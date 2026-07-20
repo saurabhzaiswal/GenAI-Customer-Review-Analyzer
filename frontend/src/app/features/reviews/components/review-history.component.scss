@@ -1,0 +1,27 @@
+.history-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mat-header-cell,
+.mat-cell {
+  padding: 1rem 0.75rem;
+}
+
+.mat-header-cell {
+  font-weight: 700;
+  color: #334155;
+}
+
+.mat-row:hover {
+  background-color: #f8fafc;
+}
+
+button {
+  color: #c4001d;
+}

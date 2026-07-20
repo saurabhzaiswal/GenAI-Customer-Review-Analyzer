@@ -1,0 +1,28 @@
+<mat-card *ngIf="result" class="review-card">
+  <div class="review-card__header">
+    <div>
+      <h3>Sentiment Analysis</h3>
+      <p>{{ result.theme }}</p>
+    </div>
+    <app-sentiment-badge [label]="result.label" [score]="result.score"></app-sentiment-badge>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="review-card__content">
+    <div class="review-card__field">
+      <span>Score</span>
+      <strong>{{ result.score }} / 5</strong>
+    </div>
+
+    <div class="review-card__field">
+      <span>Confidence</span>
+      <strong>{{ result.confidence ?? 0 | percent:'1.0-0' }}</strong>
+    </div>
+
+    <div class="review-card__field review-card__field--wide">
+      <span>Suggestion</span>
+      <p>{{ result.suggestion || 'No suggestion provided.' }}</p>
+    </div>
+  </div>
+</mat-card>

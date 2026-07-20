@@ -1,0 +1,24 @@
+.badge {
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge--positive {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge--neutral {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.badge--negative {
+  background: #fee2e2;
+  color: #991b1b;
+}

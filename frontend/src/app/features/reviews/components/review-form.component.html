@@ -1,0 +1,50 @@
+<section class="review-form">
+  <div class="form-header">
+    <h2>Submit customer reviews</h2>
+    <p>Paste one or more reviews separated by new lines. Blank lines are ignored.</p>
+  </div>
+
+  <form [formGroup]="form" class="review-form__form">
+    <mat-form-field appearance="outline" class="full-width">
+      <textarea
+        matInput
+        formControlName="reviews"
+        rows="8"
+        placeholder="Write one review per line..."
+        aria-label="Customer reviews"
+        appAutofocus
+      ></textarea>
+      <mat-error *ngIf="reviewsControl?.hasError('required')">
+        Review text is required.
+      </mat-error>
+      <mat-error *ngIf="reviewsControl?.hasError('minlength')">
+        Enter at least 20 characters for meaningful analysis.
+      </mat-error>
+      <mat-error *ngIf="reviewsControl?.hasError('maxlength')">
+        Maximum length is 2000 characters.
+      </mat-error>
+    </mat-form-field>
+
+    <div class="actions">
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        (click)="submitReview()"
+        [disabled]="isSubmitting || form.invalid"
+      >
+        {{ isSubmitting ? 'Analyzing...' : 'Analyze' }}
+      </button>
+
+      <button
+        mat-stroked-button
+        color="primary"
+        type="button"
+        (click)="submitReviewAndSave()"
+        [disabled]="isSubmitting || form.invalid"
+      >
+        {{ isSubmitting ? 'Saving...' : 'Analyze & Save' }}
+      </button>
+    </div>
+  </form>
+</section>

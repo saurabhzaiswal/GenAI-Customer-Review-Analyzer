@@ -1,0 +1,51 @@
+<div class="history-shell">
+  <ng-container *ngIf="savedReviews.length > 0; else emptyState">
+    <table mat-table [dataSource]="savedReviews" class="history-table" aria-label="Review history">
+      <ng-container matColumnDef="review">
+        <th mat-header-cell *matHeaderCellDef>Review</th>
+        <td mat-cell *matCellDef="let item">{{ item.review | truncate:80 }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="sentiment">
+        <th mat-header-cell *matHeaderCellDef>Sentiment</th>
+        <td mat-cell *matCellDef="let item">
+          <app-sentiment-badge [label]="item.label" [score]="item.score"></app-sentiment-badge>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="score">
+        <th mat-header-cell *matHeaderCellDef>Score</th>
+        <td mat-cell *matCellDef="let item">{{ item.score }}/5</td>
+      </ng-container>
+
+      <ng-container matColumnDef="theme">
+        <th mat-header-cell *matHeaderCellDef>Theme</th>
+        <td mat-cell *matCellDef="let item">{{ item.theme }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Created At</th>
+        <td mat-cell *matCellDef="let item">{{ item.createdAt | date:'short' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button color="warn" type="button" (click)="deleteFeedback.emit(item.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </ng-container>
+
+  <ng-template #emptyState>
+    <app-empty-state
+      title="No history available"
+      description="Analyze and save one or more reviews to see the history here."
+    ></app-empty-state>
+  </ng-template>
+</div>

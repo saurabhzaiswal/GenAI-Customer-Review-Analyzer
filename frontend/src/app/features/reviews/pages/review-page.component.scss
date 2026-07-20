@@ -1,0 +1,51 @@
+.page-shell {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.page-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.page-panel,
+.page-sidebar {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  padding: 1.5rem;
+}
+
+.page-sidebar {
+  min-width: 280px;
+}
+
+.analysis-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.result-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.status-panel {
+  border-radius: 1rem;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 1rem;
+}
+
+.page-footer {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: #475569;
+  text-align: center;
+}
+
+@media (min-width: 960px) {
+  .page-grid {
+    grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr);
+  }
+}

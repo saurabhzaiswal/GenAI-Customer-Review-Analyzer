@@ -1,0 +1,14 @@
+.layout-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.layout-content {
+  flex: 1;
+  width: min(1160px, 100%);
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+  box-sizing: border-box;
+}

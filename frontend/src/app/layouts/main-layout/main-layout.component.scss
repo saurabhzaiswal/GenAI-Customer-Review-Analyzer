@@ -1,0 +1,16 @@
+.layout-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #eef2ff;
+}
+
+.layout-content {
+  flex: 1;
+}
+
+.page-container {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+}

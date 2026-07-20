@@ -1,0 +1,52 @@
+<div class="page-shell">
+  <app-page-header
+    title="GenAI Customer Review Analyzer"
+    subtitle="Submit one or more reviews and receive structured AI sentiment analysis at scale."
+  ></app-page-header>
+
+  <mat-progress-bar *ngIf="reviewService.loading()" mode="indeterminate"></mat-progress-bar>
+
+  <div class="page-grid">
+    <section class="page-panel">
+      <app-review-form
+        [isSubmitting]="reviewService.loading()"
+        (analyze)="onAnalyze($event)"
+        (analyzeAndSave)="onAnalyzeAndSave($event)"
+      ></app-review-form>
+
+      <div class="status-panel" *ngIf="reviewService.error() as error">
+        <p>{{ error }}</p>
+      </div>
+
+      <section class="analysis-panel">
+        <h2>Recent insights</h2>
+
+        <div class="result-list" *ngIf="reviewService.analysisResults().length > 0; else noAnalysis">
+          <app-review-card
+            *ngFor="let result of reviewService.analysisResults()"
+            [result]="result"
+          ></app-review-card>
+        </div>
+
+        <ng-template #noAnalysis>
+          <app-empty-state
+            title="No analysis yet"
+            description="Analyze one or more customer reviews to see AI-generated sentiment and themes."
+          ></app-empty-state>
+        </ng-template>
+      </section>
+    </section>
+
+    <aside class="page-sidebar">
+      <h2>History</h2>
+      <app-review-history
+        [savedReviews]="reviewService.savedFeedback()"
+        (deleteFeedback)="onDeleteFeedback($event)"
+      ></app-review-history>
+    </aside>
+  </div>
+
+  <footer class="page-footer">
+    Built by Saurabh
+  </footer>
+</div>
