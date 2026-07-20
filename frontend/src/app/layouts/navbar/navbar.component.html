@@ -1,10 +1,29 @@
-<mat-toolbar color="primary" class="navbar">
-  <div class="brand">
-    <a routerLink="/">GenAI Customer Review Analyzer</a>
-  </div>
+<mat-toolbar class="navbar">
+  <div class="navbar__inner">
+    <a routerLink="/" class="brand" aria-label="GenAI Customer Review Analyzer home">
+      <img src="/img/logo.svg" alt="" width="35" height="35" class="brand__logo" />
+      <span class="brand__text">GenAI Customer Review Analyzer</span>
+    </a>
 
-  <nav class="nav-links">
-    <a mat-button routerLink="/">Reviews</a>
-    <a mat-button routerLink="/dashboard">Dashboard</a>
-  </nav>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a mat-button routerLink="/" routerLinkActive="nav-active" [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon aria-hidden="true">rate_review</mat-icon>
+        Reviews
+      </a>
+      <a mat-button routerLink="/dashboard" routerLinkActive="nav-active">
+        <mat-icon aria-hidden="true">insights</mat-icon>
+        Dashboard
+      </a>
+      <a
+        mat-stroked-button
+        class="github-link"
+        href="https://github.com/saurabhzaiswal"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <mat-icon aria-hidden="true">code</mat-icon>
+        GitHub
+      </a>
+    </nav>
+  </div>
 </mat-toolbar>

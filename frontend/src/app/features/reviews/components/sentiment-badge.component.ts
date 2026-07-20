@@ -1,13 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatChipsModule } from '@angular/material/chips';
 import { SentimentLabel } from '../../../shared/types';
 
 @Component({
   standalone: true,
   selector: 'app-sentiment-badge',
   templateUrl: './sentiment-badge.component.html',
-  styleUrls: ['./sentiment-badge.component.css'],
-  imports: [CommonModule],
+  styleUrls: ['./sentiment-badge.component.scss'],
+  imports: [CommonModule, MatChipsModule],
 })
 export class SentimentBadgeComponent {
   @Input() label: SentimentLabel = 'neutral';
@@ -17,7 +18,7 @@ export class SentimentBadgeComponent {
     return this.label.charAt(0).toUpperCase() + this.label.slice(1);
   }
 
-  get badgeClass(): string {
-    return `badge badge--${this.label}`;
+  get chipClass(): string {
+    return `sentiment-chip sentiment-chip--${this.label}`;
   }
 }

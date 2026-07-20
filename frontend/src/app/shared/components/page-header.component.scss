@@ -1,26 +1,44 @@
 .page-header {
-  display: grid;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  padding: 0.25rem 0 0.5rem;
 }
 
-.page-header .eyebrow {
+.page-header__content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.page-header__logo {
+  flex-shrink: 0;
+  width: clamp(250px, 8vw, 350px);
+
+  height: auto;
+}
+
+.eyebrow {
   margin: 0;
   color: #2563eb;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .page-header h1 {
-  margin: 0;
-  font-size: clamp(2rem, 3vw, 3rem);
-  line-height: 1.05;
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.15;
 }
 
-.page-header .subtitle {
-  margin: 0;
-  max-width: 48rem;
+.subtitle {
+  margin: 0.65rem 0 0;
   color: #475569;
+  max-width: 52rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 639px) {
+  .page-header__content {
+    flex-direction: column;
+  }
 }
