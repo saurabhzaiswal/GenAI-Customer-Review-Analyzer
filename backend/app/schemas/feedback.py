@@ -19,7 +19,7 @@ class ReviewRequest(BaseModel):
 
 
 # -----------------------------
-# Gemini Analysis Schema
+# AI LMM Analysis Schema
 # -----------------------------
 
 class AnalysisResponse(BaseModel):

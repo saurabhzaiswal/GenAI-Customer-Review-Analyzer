@@ -127,7 +127,7 @@ def analyze_review(
     review_service: ReviewService = Depends(get_review_service),
 ):
     """
-    Analyze a customer review using Gemini without saving it.
+    Analyze a customer review using AI LLM without saving it.
     """
 
     # return feedback_service.analyze_review(request.text)

@@ -11,6 +11,14 @@ export const routes: Routes = [
         pathMatch: 'full',
         loadComponent: () => import('./features/reviews/pages/review-page.component').then((m) => m.ReviewPageComponent),
       },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/pages/dashboard-page.component').then((m) => m.DashboardPageComponent),
+      },
+      {
+        path: '**',
+        redirectTo: '',
+      },
     ],
   },
 ];

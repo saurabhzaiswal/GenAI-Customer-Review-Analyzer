@@ -1,0 +1,25 @@
+.dashboard-shell {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.dashboard-summary {
+  display: grid;
+  gap: 1rem;
+}
+
+.dashboard-charts {
+  display: grid;
+}
+
+@media (min-width: 900px) {
+  .dashboard-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .dashboard-charts {
+    grid-template-columns: 1fr;
+  }
+}

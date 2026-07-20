@@ -63,7 +63,7 @@ class GeminiProvider(AIProvider):
             """
 
         response = self.client.models.generate_content(
-            model=settings.GEMINI_MODEL,
+            model=settings.AI_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.2,

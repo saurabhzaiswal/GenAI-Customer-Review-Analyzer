@@ -3,9 +3,20 @@
   gap: 1rem;
 }
 
+.history-toolbar {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 840px) {
+  .history-toolbar {
+    grid-template-columns: 1.6fr 0.8fr 0.8fr;
+    align-items: center;
+  }
+}
+
 .history-table {
   width: 100%;
-  border-collapse: collapse;
 }
 
 .mat-header-cell,

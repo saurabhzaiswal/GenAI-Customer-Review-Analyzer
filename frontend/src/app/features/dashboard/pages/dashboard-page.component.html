@@ -1,0 +1,60 @@
+<div class="dashboard-shell">
+  <app-page-header
+    title="Analytics Dashboard"
+    subtitle="Monitor sentiment trends and review themes from your saved customer feedback."
+  ></app-page-header>
+
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate"></mat-progress-bar>
+
+  <section *ngIf="savedFeedback().length > 0; else noData">
+    <div class="dashboard-summary">
+      <app-stats-card
+        title="Total Reviews"
+        [value]="statistics.totalReviews.toString()"
+        description="Total saved reviews"
+      ></app-stats-card>
+
+      <app-stats-card
+        title="Positive"
+        [value]="statistics.positivePercent + '%'"
+        description="Positive sentiment share"
+      ></app-stats-card>
+
+      <app-stats-card
+        title="Neutral"
+        [value]="statistics.neutralPercent + '%'"
+        description="Neutral sentiment share"
+      ></app-stats-card>
+
+      <app-stats-card
+        title="Negative"
+        [value]="statistics.negativePercent + '%'"
+        description="Negative sentiment share"
+      ></app-stats-card>
+
+      <app-stats-card
+        title="Average Score"
+        [value]="statistics.averageScore.toString()"
+        description="Average sentiment score"
+      ></app-stats-card>
+
+      <app-stats-card
+        title="Top Theme"
+        [value]="statistics.topTheme"
+        description="Most mentioned theme"
+        [highlight]="true"
+      ></app-stats-card>
+    </div>
+
+    <section class="dashboard-charts">
+      <app-analytics-charts [reviews]="savedFeedback()"></app-analytics-charts>
+    </section>
+  </section>
+
+  <ng-template #noData>
+    <app-empty-state
+      title="No saved reviews yet"
+      description="Analyze customer feedback on the Reviews page to unlock analytics here."
+    ></app-empty-state>
+  </ng-template>
+</div>
