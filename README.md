@@ -96,7 +96,7 @@ ReviewService (sanitize → orchestrate)
 
 ---
 
-## ⚙ Technology Stack
+## Technology Stack
 
 | Layer | Technology |
 |---|---|
@@ -108,7 +108,7 @@ ReviewService (sanitize → orchestrate)
 
 ---
 
-## 🗂 Project Structure
+## Project Structure
 
 ```
 GenAI-Customer-Review-Analyzer/
@@ -190,7 +190,7 @@ AI_MODEL=gemini-2.5-flash
 
 ---
 
-## ▶ Running Locally
+## Running Locally
 
 **Prerequisites:** Python 3.14+, [`uv`](https://docs.astral.sh/uv/), Node.js 20+, a running PostgreSQL instance.
 
