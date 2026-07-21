@@ -96,7 +96,7 @@ ReviewService (sanitize → orchestrate)
 
 ---
 
-## ⚙ Technology Stack
+## Technology Stack
 
 | Layer | Technology |
 |---|---|
@@ -108,7 +108,7 @@ ReviewService (sanitize → orchestrate)
 
 ---
 
-## 🗂 Project Structure
+## Project Structure
 
 ```
 GenAI-Customer-Review-Analyzer/
