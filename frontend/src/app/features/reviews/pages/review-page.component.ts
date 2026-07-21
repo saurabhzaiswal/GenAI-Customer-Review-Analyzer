@@ -5,8 +5,11 @@ import { ReviewHistoryComponent } from '../components/review-history.component';
 import { ReviewCardComponent } from '../components/review-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state.component';
+import { StatsCardComponent } from '../../../shared/components/stats-card.component';
 import { ReviewService } from '../services/review.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   standalone: true,
@@ -20,7 +23,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     ReviewCardComponent,
     PageHeaderComponent,
     EmptyStateComponent,
+    StatsCardComponent,
     MatProgressBarModule,
+    MatButtonModule,
+    MatIconModule,
   ],
 })
 export class ReviewPageComponent {
@@ -40,5 +46,9 @@ export class ReviewPageComponent {
 
   protected onDeleteFeedback(feedbackId: string): void {
     void this.reviewService.deleteFeedback(feedbackId);
+  }
+
+  protected clearResults(): void {
+    this.reviewService.clearSessionResults();
   }
 }

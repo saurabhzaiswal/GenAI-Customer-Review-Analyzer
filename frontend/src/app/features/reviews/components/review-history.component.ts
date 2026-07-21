@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
+import { DayjsFormatPipe } from '../../../shared/pipes/dayjs-format.pipe';
 import { SentimentBadgeComponent } from './sentiment-badge.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state.component';
@@ -21,6 +22,7 @@ interface ReviewFilter {
   search: string;
   sentiment: SentimentLabel | 'all';
   theme: string;
+  minScore: number;
 }
 
 @Component({
@@ -43,6 +45,7 @@ interface ReviewFilter {
     SentimentBadgeComponent,
     EmptyStateComponent,
     TruncatePipe,
+    DayjsFormatPipe,
   ],
 })
 export class ReviewHistoryComponent implements AfterViewInit, OnChanges {
@@ -52,10 +55,19 @@ export class ReviewHistoryComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatPaginator) paginator?: MatPaginator;
   @ViewChild(MatSort) sort?: MatSort;
 
-  readonly displayedColumns = ['review', 'sentiment', 'score', 'theme', 'created_at', 'actions'];
+  readonly displayedColumns = [
+    'review',
+    'sentiment',
+    'score',
+    'theme',
+    'confidence',
+    'created_at',
+    'actions',
+  ];
   readonly searchControl = new FormControl('');
   readonly sentimentControl = new FormControl<'all' | SentimentLabel>('all');
   readonly themeControl = new FormControl<string>('all');
+  readonly scoreControl = new FormControl<number>(0);
 
   dataSource = new MatTableDataSource<Feedback>([]);
   availableThemes: string[] = [];
@@ -80,6 +92,7 @@ export class ReviewHistoryComponent implements AfterViewInit, OnChanges {
       search: this.searchControl.value?.trim().toLowerCase() ?? '',
       sentiment: this.sentimentControl.value ?? 'all',
       theme: this.themeControl.value ?? 'all',
+      minScore: this.scoreControl.value ?? 0,
     });
 
     if (this.paginator) {
@@ -91,7 +104,7 @@ export class ReviewHistoryComponent implements AfterViewInit, OnChanges {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Delete review',
-        message: 'Are you sure you want to delete this review from the saved history?',
+        message: 'Are you sure you want to delete this review from saved history?',
       },
     });
 
@@ -105,7 +118,8 @@ export class ReviewHistoryComponent implements AfterViewInit, OnChanges {
   private updateReviews(): void {
     this.availableThemes = Array.from(
       new Set(this.savedReviews.map((item) => item.theme).filter((theme) => !!theme))
-    );
+    ).sort();
+
     this.dataSource.data = [...this.savedReviews];
     this.applyFilters();
   }
@@ -124,8 +138,9 @@ export class ReviewHistoryComponent implements AfterViewInit, OnChanges {
       const matchesSentiment =
         parsed.sentiment === 'all' || data.label === parsed.sentiment;
       const matchesTheme = parsed.theme === 'all' || data.theme === parsed.theme;
+      const matchesScore = data.score >= parsed.minScore;
 
-      return matchesSearch && matchesSentiment && matchesTheme;
+      return matchesSearch && matchesSentiment && matchesTheme && matchesScore;
     };
   }
 }

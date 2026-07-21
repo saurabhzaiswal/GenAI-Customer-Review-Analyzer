@@ -1,28 +1,75 @@
 .page-shell {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.page-progress {
+  border-radius: 9999px;
 }
 
 .page-grid {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .page-panel,
 .page-sidebar {
-  background: white;
+  background: #ffffff;
   border-radius: 1.5rem;
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
-  padding: 1.5rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
-.page-sidebar {
-  min-width: 280px;
+.page-sidebar__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
 }
 
+.summary-panel,
 .analysis-panel {
   display: grid;
   gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.summary-panel__header,
+.analysis-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+.summary-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
 .result-list {
@@ -31,21 +78,41 @@
 }
 
 .status-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
   border-radius: 1rem;
   background: #fef3c7;
   color: #92400e;
-  padding: 1rem;
-}
-
-.page-footer {
+  padding: 0.85rem 1rem;
   margin-top: 1rem;
-  font-size: 0.95rem;
-  color: #475569;
-  text-align: center;
+
+  p {
+    margin: 0;
+  }
 }
 
-@media (min-width: 960px) {
+@media (min-width: 1024px) {
   .page-grid {
-    grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr);
+    grid-template-columns: minmax(0, 1.75fr) minmax(320px, 1fr);
+    align-items: start;
+  }
+
+  .page-sidebar {
+    position: sticky;
+    top: 5.5rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .page-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .summary-panel__header button,
+  .analysis-panel__header span {
+    width: 100%;
   }
 }

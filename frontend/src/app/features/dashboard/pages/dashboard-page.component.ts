@@ -6,7 +6,7 @@ import { StatsCardComponent } from '../../../shared/components/stats-card.compon
 import { AnalyticsChartsComponent } from '../components/analytics-charts.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state.component';
 import { MatCardModule } from '@angular/material/card';
-import { MatGridListModule } from '@angular/material/grid-list';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
@@ -21,7 +21,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     AnalyticsChartsComponent,
     EmptyStateComponent,
     MatCardModule,
-    MatGridListModule,
+    MatChipsModule,
     MatProgressBarModule,
   ],
 })
@@ -60,8 +60,11 @@ export class DashboardPageComponent implements OnInit {
       neutralPercent: total ? Math.round((sentimentCounts.neutral / total) * 100) : 0,
       negativePercent: total ? Math.round((sentimentCounts.negative / total) * 100) : 0,
       averageScore: total ? Number((scores.reduce((sum, value) => sum + value, 0) / total).toFixed(1)) : 0,
-      averageConfidence: total ? Number((confidences.reduce((sum, value) => sum + value, 0) / total).toFixed(2)) : 0,
+      averageConfidence: total
+        ? Number((confidences.reduce((sum, value) => sum + value, 0) / total).toFixed(2))
+        : 0,
       topTheme: sortedThemes[0]?.[0] ?? 'N/A',
+      topThemes: sortedThemes.slice(0, 5),
       sentimentCounts,
       themeCounts,
     };

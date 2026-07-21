@@ -12,7 +12,7 @@ export interface ConfirmDialogData {
   standalone: true,
   selector: 'app-confirm-dialog',
   templateUrl: './confirm-dialog.component.html',
-  styleUrls: ['./confirm-dialog.component.css'],
+  styleUrls: ['./confirm-dialog.component.scss'],
   imports: [CommonModule, MatDialogModule, MatButtonModule],
 })
 export class ConfirmDialogComponent {

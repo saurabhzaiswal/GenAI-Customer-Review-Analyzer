@@ -1,0 +1,10 @@
+.confirm-dialog {
+  min-width: min(100%, 420px);
+}
+
+.confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}

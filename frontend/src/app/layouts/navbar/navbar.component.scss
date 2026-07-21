@@ -1,15 +1,86 @@
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
 }
 
-.brand a {
+.navbar__inner {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
   text-decoration: none;
-  color: white;
+  color: inherit;
+  min-width: 0;
+}
+
+.brand__logo {
+  flex-shrink: 0;
+}
+
+.brand__text {
   font-weight: 700;
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.2;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .nav-links a {
-  color: white;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.nav-active {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+
+.github-link {
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 767px) {
+  .navbar__inner {
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+  }
+
+  .brand__text {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-links a mat-icon {
+    display: none;
+  }
 }

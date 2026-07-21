@@ -1,8 +1,9 @@
 <div class="dashboard-shell">
-  <app-page-header
-    title="Analytics Dashboard"
-    subtitle="Monitor sentiment trends and review themes from your saved customer feedback."
-  ></app-page-header>
+    <app-page-header
+      title="Analytics Dashboard"
+      subtitle="Monitor sentiment trends, theme frequency, and review volume from saved customer feedback."
+      [showLogo]="true"
+    ></app-page-header>
 
   <mat-progress-bar *ngIf="loading()" mode="indeterminate"></mat-progress-bar>
 
@@ -39,12 +40,27 @@
       ></app-stats-card>
 
       <app-stats-card
+        title="Avg Confidence"
+        value="{{ statistics.averageConfidence | percent:'1.0-0' }}"
+        description="Mean model confidence"
+      ></app-stats-card>
+
+      <app-stats-card
         title="Top Theme"
         [value]="statistics.topTheme"
         description="Most mentioned theme"
         [highlight]="true"
       ></app-stats-card>
     </div>
+
+    <mat-card class="themes-card">
+      <h3>Most common themes</h3>
+      <mat-chip-set aria-label="Most common themes">
+        <mat-chip *ngFor="let theme of statistics.topThemes">
+          {{ theme[0] }} · {{ theme[1] }}
+        </mat-chip>
+      </mat-chip-set>
+    </mat-card>
 
     <section class="dashboard-charts">
       <app-analytics-charts [reviews]="savedFeedback()"></app-analytics-charts>
@@ -54,7 +70,7 @@
   <ng-template #noData>
     <app-empty-state
       title="No saved reviews yet"
-      description="Analyze customer feedback on the Reviews page to unlock analytics here."
+      description="Analyze customer feedback on the Reviews page and save results to unlock analytics here."
     ></app-empty-state>
   </ng-template>
 </div>

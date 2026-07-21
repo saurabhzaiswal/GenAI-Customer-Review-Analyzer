@@ -1,10 +1,11 @@
 <div class="page-shell">
   <app-page-header
-    title="GenAI Customer Review Analyzer"
-    subtitle="Submit one or more reviews and receive structured AI sentiment analysis at scale."
+    title=""
+    subtitle="Paste customer reviews (one per line), analyze sentiment with Gemini, and track insights over time."
+    [showLogo]="true"
   ></app-page-header>
 
-  <mat-progress-bar *ngIf="reviewService.loading()" mode="indeterminate"></mat-progress-bar>
+  <mat-progress-bar *ngIf="reviewService.loading()" mode="indeterminate" class="page-progress"></mat-progress-bar>
 
   <div class="page-grid">
     <section class="page-panel">
@@ -15,11 +16,54 @@
       ></app-review-form>
 
       <div class="status-panel" *ngIf="reviewService.error() as error">
+        <mat-icon aria-hidden="true">warning</mat-icon>
         <p>{{ error }}</p>
       </div>
 
+      <section class="summary-panel" *ngIf="reviewService.batchSummary().totalReviews > 0">
+        <div class="summary-panel__header">
+          <h2>Batch summary</h2>
+          <button mat-stroked-button type="button" (click)="clearResults()">
+            <mat-icon aria-hidden="true">clear_all</mat-icon>
+            Clear results
+          </button>
+        </div>
+
+        <div class="summary-grid">
+          <app-stats-card
+            title="Reviews"
+            [value]="reviewService.batchSummary().totalReviews.toString()"
+            description="Analyzed in this session"
+          ></app-stats-card>
+
+          <app-stats-card
+            title="Average score"
+            [value]="reviewService.batchSummary().averageScore.toString()"
+            description="Mean sentiment score"
+          ></app-stats-card>
+
+          <app-stats-card
+            title="% Positive"
+            [value]="reviewService.batchSummary().positivePercent + '%'"
+            description="Positive sentiment share"
+          ></app-stats-card>
+
+          <app-stats-card
+            title="Top theme"
+            [value]="reviewService.batchSummary().topTheme"
+            description="Most mentioned topic"
+            [highlight]="true"
+          ></app-stats-card>
+        </div>
+      </section>
+
       <section class="analysis-panel">
-        <h2>Recent insights</h2>
+        <div class="analysis-panel__header">
+          <h2>Recent insights</h2>
+          <span *ngIf="reviewService.analysisResults().length > 0">
+            {{ reviewService.analysisResults().length }} result(s)
+          </span>
+        </div>
 
         <div class="result-list" *ngIf="reviewService.analysisResults().length > 0; else noAnalysis">
           <app-review-card
@@ -31,22 +75,21 @@
         <ng-template #noAnalysis>
           <app-empty-state
             title="No analysis yet"
-            description="Analyze one or more customer reviews to see AI-generated sentiment and themes."
+            description="Analyze one or more customer reviews to see AI-generated sentiment, themes, and suggestions."
           ></app-empty-state>
         </ng-template>
       </section>
     </section>
 
     <aside class="page-sidebar">
-      <h2>History</h2>
+      <div class="page-sidebar__header">
+        <h2>Saved history</h2>
+        <span>{{ reviewService.savedFeedback().length }} saved</span>
+      </div>
       <app-review-history
         [savedReviews]="reviewService.savedFeedback()"
         (deleteFeedback)="onDeleteFeedback($event)"
       ></app-review-history>
     </aside>
   </div>
-
-  <footer class="page-footer">
-    Built by Saurabh
-  </footer>
 </div>
