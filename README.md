@@ -7,7 +7,9 @@
 ![Python](https://img.shields.io/badge/Python-3.14%2B-blue?logo=python)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-SQLAlchemy%202.0-336791?logo=postgresql)
 ![Alembic](https://img.shields.io/badge/Migrations-Alembic-6BA81E)
-![Gemini](https://img.shields.io/badge/Google-Gemini-orange?logo=google)
+![Gemini](https://img.shields.io/badge/Google-Gemini-blue?logo=google)
+![OpenAI](https://img.shields.io/badge/OpenAI-ChatGPT-white?logo=openai)
+![Claude](https://img.shields.io/badge/Anthropic-Claude-orange?logo=anthropic)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 **A production-style, full-stack GenAI application that turns raw customer feedback into structured business insight.**
