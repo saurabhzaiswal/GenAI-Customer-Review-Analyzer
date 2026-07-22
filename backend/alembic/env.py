@@ -15,7 +15,7 @@ from app.core.config import settings
 from app.core.database import Base
 
 # Import every SQLAlchemy model
-from app.models.feedback import Feedback
+from app.models.feedback import Feedback # noqa: F401
 
 from alembic import context
 

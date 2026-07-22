@@ -48,7 +48,7 @@ jobs:
       - name: Security audit
         run: uvx pip-audit
 
-      # `uvx` runs ruff in an isolated, on-the-fly environment without
+      # `uvx` runs ruff in an isolated, on-the-fly environment without, uv run pip-audit
       # requiring it to be added to pyproject.toml first. Once you're
       # ready to pin a version, run `uv add --dev ruff` locally and
       # switch this to `uv run ruff check .` instead.
