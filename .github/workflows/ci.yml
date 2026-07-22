@@ -5,7 +5,7 @@ name: CI
 # - On every pull request targeting master (catches problems BEFORE merge)
 on:
   push:
-    branches: [master]
+    branches: - "**"
   pull_request:
     branches: [master]
 
@@ -44,6 +44,9 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --frozen
+
+      - name: Security audit
+        run: uv run pip-audit
 
       # `uvx` runs ruff in an isolated, on-the-fly environment without
       # requiring it to be added to pyproject.toml first. Once you're
@@ -137,7 +140,7 @@ jobs:
       DEBUG: "true"
       AI_PROVIDER: gemini
       AI_API_KEY: ci-placeholder
-      AI_MODEL: gemini-2.5-flash
+      AI_MODEL: gemini-3.5-flash
 
     steps:
       - name: Check out the repo
