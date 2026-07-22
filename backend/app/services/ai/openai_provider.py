@@ -6,7 +6,6 @@ from app.services.ai.provider import AIProvider
 
 
 class OpenAIProvider(AIProvider):
-
     def __init__(self):
         self.client = OpenAI(
             api_key=settings.AI_API_KEY,

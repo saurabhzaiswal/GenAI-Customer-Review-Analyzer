@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     AI_PROVIDER: str
     AI_API_KEY: str
     AI_MODEL: str
-    
 
     model_config = SettingsConfigDict(
         env_file=".env",

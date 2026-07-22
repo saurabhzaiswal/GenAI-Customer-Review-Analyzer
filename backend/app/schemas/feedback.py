@@ -9,13 +9,14 @@ from pydantic import BaseModel, ConfigDict, Field
 # Request Schema
 # -----------------------------
 
+
 class ReviewRequest(BaseModel):
     text: str = Field(
         ...,
         min_length=1,
         max_length=5000,
         description="Customer review text",
-        examples=["The food was amazing but delivery was slow."]
+        examples=["The food was amazing but delivery was slow."],
     )
 
 
@@ -23,16 +24,14 @@ class ReviewRequest(BaseModel):
 # AI LMM Analysis Schema
 # -----------------------------
 
+
 class AnalysisResponse(BaseModel):
     label: Literal["positive", "neutral", "negative"]
     score: int = Field(..., ge=1, le=5)
     theme: str
     suggestion: str | None = None
     confidence: float | None = Field(
-        default=None,
-        ge=0,
-        le=1,
-        description="Model confidence score (0.0 to 1.0)"
+        default=None, ge=0, le=1, description="Model confidence score (0.0 to 1.0)"
     )
 
 
@@ -40,22 +39,20 @@ class AnalysisResponse(BaseModel):
 # Database Create Schema
 # -----------------------------
 
+
 class FeedbackCreate(BaseModel):
     review: str
     label: Literal["positive", "neutral", "negative"]
     score: int = Field(..., ge=1, le=5)
     theme: str
     suggestion: str | None = None
-    confidence: float | None = Field(
-        default=None,
-        ge=0,
-        le=1
-    )
+    confidence: float | None = Field(default=None, ge=0, le=1)
 
 
 # -----------------------------
 # API Response Schema
 # -----------------------------
+
 
 class FeedbackResponse(BaseModel):
     id: UUID

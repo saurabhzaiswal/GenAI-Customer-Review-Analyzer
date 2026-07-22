@@ -50,11 +50,11 @@ class Feedback(Base):
         Text,
         nullable=True,
     )
-    
+
     confidence: Mapped[float | None] = mapped_column(
-    Float,
-    nullable=True,
-)
+        Float,
+        nullable=True,
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

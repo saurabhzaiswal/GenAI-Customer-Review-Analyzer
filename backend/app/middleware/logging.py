@@ -5,7 +5,6 @@ from app.utils.logger import logger
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
-
     async def dispatch(self, request: Request, call_next):
         # Use the app's logger instead of print() or logging.getLogger() to
         # (app/utils/logger.py) so log level, timestamps, and format stay

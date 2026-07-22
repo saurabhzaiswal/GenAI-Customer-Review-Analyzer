@@ -17,7 +17,8 @@ async def app_exception_handler(
             "path": request.url.path,
         },
     )
-    
+
+
 async def global_exception_handler(
     request: Request,
     exc: Exception,

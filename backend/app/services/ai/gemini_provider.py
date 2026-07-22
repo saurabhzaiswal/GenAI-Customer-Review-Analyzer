@@ -7,7 +7,6 @@ from app.services.ai.provider import AIProvider
 
 
 class GeminiProvider(AIProvider):
-
     def __init__(self):
         self.client = genai.Client(
             api_key=settings.AI_API_KEY,
