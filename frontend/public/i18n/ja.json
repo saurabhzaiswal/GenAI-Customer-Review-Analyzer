@@ -88,6 +88,7 @@
     "excelExported": "Excelレポートを出力しました。",
     "pdfExported": "PDFレポートを出力しました。"
   },
+  "report": { "subtitle": "顧客フィードバック分析レポート", "generated": "作成日時", "atAGlance": "フィードバック概要", "reviewDetails": "レビュー詳細", "recommendedAction": "推奨アクション", "fontLoadError": "PDFの言語フォントを読み込めませんでした。もう一度お試しください。" },
   "dashboard": {
     "eyebrow": "顧客インテリジェンス",
     "title": "声を、行動につなげる。",

@@ -208,7 +208,7 @@ classDiagram
     }
     class ClaudeProvider {
         +analyze_review(review) AnalysisResponse
-        note: currently raises NotImplementedError
+        note: structured Anthropic Messages output
     }
     class AIProviderFactory {
         +create()$ AIProvider

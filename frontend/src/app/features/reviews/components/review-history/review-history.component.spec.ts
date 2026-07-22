@@ -1,6 +1,6 @@
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Feedback } from '../../models/feedback';
+import { Feedback } from '@app/features/reviews/models/feedback';
 import { ReviewHistoryComponent } from './review-history.component';
 import { provideTranslateService } from '@ngx-translate/core';
 

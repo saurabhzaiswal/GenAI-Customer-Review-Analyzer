@@ -1,4 +1,4 @@
-import { SentimentLabel } from '../../../shared/types';
+import { SentimentLabel } from '@app/shared/types';
 
 export interface AnalysisResponse {
   review: string;

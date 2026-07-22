@@ -1,10 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from '../navbar/navbar.component';
-import { FooterComponent } from '../footer/footer.component';
+import { NavbarComponent } from '@app/layouts/navbar/navbar.component';
+import { FooterComponent } from '@app/layouts/footer/footer.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { LoadingService } from '../../core/services/loading.service';
+import { LoadingService } from '@app/core/services/loading.service';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({

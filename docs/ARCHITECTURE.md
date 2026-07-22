@@ -83,13 +83,15 @@ Below 768px, the desktop navbar actions become one fixed drawer that enters from
 
 Dashboard charts use Chart.js canvas-native tooltips rather than external tooltip DOM containers. Tooltips derive surface, text, and border colors from the active theme, use non-intersect interaction for touch targets, and format counts and sentiment percentages in context. Chart cards keep one semantic heading and do not add persistent data-label overlays.
 
-PDF report export is generated client-side and lazy-loads jsPDF only when requested. The report mirrors the dashboard visual language with the application logo, branded header, summary metrics, sentiment bars, ranked themes, paginated review cards, recommended actions, and page footers. Long reviews are split across continuation cards to prevent clipping.
+PDF report export is generated client-side and lazy-loads jsPDF only when requested. The report retains the native vector dashboard design: application logo, geometric branded header, summary metrics, sentiment bars, ranked themes, paginated review cards, long-review continuation handling, and page footers. Interface labels and date formatting come from the active ngx-translate language; customer review content remains unchanged. Hindi, Japanese, and Korean exports load the matching self-hosted Noto TTF from `public/fonts` and embed only the used glyphs; Latin-language exports retain jsPDF's compact built-in font.
 
 ## Loading and performance
 
-`LoadingService` tracks the number of active HTTP requests. The interceptor calls `start()` and `stop()` for every request, so one finishing request cannot hide the indicator while another remains active. `MainLayoutComponent` renders one fixed, full-width progress bar above the sticky navbar.
+`LoadingService` tracks backend API subscriptions with unique request tokens rather than a numeric counter. The loading interceptor ignores translations and other static assets, starts tracking at subscription time, and releases the exact token on completion, error, cancellation, or synchronous downstream failure. `MainLayoutComponent` renders one fixed, full-width progress bar above the sticky navbar only while at least one API token remains active.
 
-Feature pages remain lazy-loaded. Vercel Analytics is dynamically imported after Angular bootstraps, Chart.js registers only the controllers/elements/scales/plugins used by the three charts, dashboard statistics are memoized with `computed()`, and native `Intl.DateTimeFormat` replaces the CommonJS `dayjs` dependency.
+The GitHub Actions workflow runs for pull requests and merge groups targeting `master`, plus pushes to `master`. Locked development dependencies provide pip-audit, Ruff, and Pytest; separate jobs validate the backend, frontend, and Alembic migrations. A final `CI required` aggregation job is the stable status check configured in the `master` ruleset.
+
+Feature pages remain lazy-loaded. Vercel Analytics is dynamically imported after Angular bootstraps, Chart.js registers only the controllers/elements/scales/plugins used by the three charts, dashboard statistics are memoized with `computed()`, and native `Intl.DateTimeFormat` replaces the CommonJS `dayjs` dependency. Batch analysis uses three bounded workers while retaining input order, and history loading shares one in-flight request and then reuses signal state across lazy-route navigation.
 
 ## Frontend component structure
 
@@ -106,9 +108,11 @@ components/
 
 Feature pages follow the same convention under `pages/<page-name>/`. Layout components were already organized by folder. This keeps relative assets local and makes component ownership explicit.
 
+Imports that cross component or feature boundaries use the `@app/*` source-root alias; environment imports use `@env/*`. Local `./` imports remain appropriate for colocated files. Parent-traversal imports are intentionally disallowed because moving a component should not require rewriting a chain of `../../../` segments.
+
 ## SEO shell
 
-Because Angular is a client-rendered SPA, static discovery metadata lives in `src/index.html`: title, description, keywords, robots, Open Graph, Twitter, PWA tags, and `WebApplication` JSON-LD. A canonical URL and absolute social image should be added after the final Vercel production domain is known; publishing an invented URL would be worse than omitting it.
+Because Angular is a client-rendered SPA, static discovery metadata lives in `src/index.html`: canonical URL, title, description, keywords, robots, Open Graph, Twitter, PWA tags, and `WebApplication` JSON-LD. `public/robots.txt` points crawlers to `public/sitemap.xml`, which lists the Reviews and Dashboard routes on the production Vercel domain.
 
 ## Internationalization and theme state
 

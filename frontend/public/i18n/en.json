@@ -88,6 +88,7 @@
     "excelExported": "Excel report exported.",
     "pdfExported": "PDF report exported."
   },
+  "report": { "subtitle": "Customer feedback intelligence report", "generated": "Generated", "atAGlance": "Feedback at a glance", "reviewDetails": "Review details", "recommendedAction": "Recommended action", "fontLoadError": "The PDF language font could not be loaded. Please try again." },
   "dashboard": {
     "eyebrow": "Customer intelligence",
     "title": "Feedback, made actionable.",

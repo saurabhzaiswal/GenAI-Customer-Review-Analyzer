@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { SentimentBadgeComponent } from '../sentiment-badge/sentiment-badge.component';
-import { AnalysisResponse } from '../../models/analysis-response';
+import { SentimentBadgeComponent } from '@app/features/reviews/components/sentiment-badge/sentiment-badge.component';
+import { AnalysisResponse } from '@app/features/reviews/models/analysis-response';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({

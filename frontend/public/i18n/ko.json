@@ -88,6 +88,7 @@
     "excelExported": "Excel 보고서를 내보냈습니다.",
     "pdfExported": "PDF 보고서를 내보냈습니다."
   },
+  "report": { "subtitle": "고객 피드백 인텔리전스 보고서", "generated": "생성됨", "atAGlance": "피드백 한눈에 보기", "reviewDetails": "리뷰 세부 정보", "recommendedAction": "권장 조치", "fontLoadError": "PDF 언어 글꼴을 불러올 수 없습니다. 다시 시도해 주세요." },
   "dashboard": {
     "eyebrow": "고객 인텔리전스",
     "title": "피드백을 실행으로.",

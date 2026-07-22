@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { SentimentLabel } from '../types';
+import { SentimentLabel } from '@app/shared/types';
 
 @Pipe({
   name: 'sentiment',

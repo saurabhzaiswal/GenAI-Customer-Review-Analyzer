@@ -10,13 +10,16 @@ Angular 21 frontend for the GenAI Customer Review Analyzer. It provides customer
 - Sortable Material table with 5/10/20-row pagination
 - Three-dot row actions, review-details dialog, and delete confirmation
 - Global loading and error interceptors
-- Fixed top loading bar with safe concurrent-request tracking
+- Fixed top loading bar limited to backend API calls, with per-request tokens that cannot be stranded by duplicate or out-of-order completion
 - Component-per-folder structure for shared UI, feature UI, and feature pages
 - Centralized `--primary-color`/`--secondary-color` theme with `color-mix()` derivatives
 - SEO, social metadata, and WebApplication JSON-LD in `src/index.html`
 - Runtime ngx-translate dictionaries for eight languages and persistent dark mode
 - CSV/Excel review import and filtered Excel/PDF report export via lazy dependencies
-- Dashboard-style PDF reports with product branding, summary metrics, sentiment bars, ranked themes, paginated review cards, and long-review continuation handling
+- Dashboard-style jsPDF reports with product branding, summary metrics, sentiment bars, ranked themes, paginated review cards, long-review continuation handling, selected-language labels, and locale-specific embedded Noto fonts
+- Source-root TypeScript aliases (`@app/*` and `@env/*`) replace fragile parent-traversal imports
+- Bounded three-request batch concurrency and a shared in-flight history cache reduce waiting and duplicate API work
+- Canonical metadata, `robots.txt`, and `sitemap.xml` use the production Vercel URL
 - Maximum 12px radius for buttons, fields, cards, containers, and Material overlays
 - Flat mobile navigation drawer with inline languages, theme control, backdrop dismissal, and no nested popovers
 - Theme-aware native Chart.js tooltips with review counts, sentiment percentages, and mobile-friendly interaction

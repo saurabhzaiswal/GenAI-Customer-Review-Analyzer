@@ -6,6 +6,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- Replaced frontend parent-traversal imports with `@app/*` and `@env/*` source-root aliases.
+- Localized the existing native jsPDF dashboard report labels and dates, with self-hosted Noto fonts for correct Hindi, Japanese, and Korean glyph encoding.
+- Added bounded batch-analysis concurrency and history request caching while preserving result order.
+- Added production canonical metadata, `robots.txt`, and `sitemap.xml` for the Reviews and Dashboard routes.
+- Replaced repository row-loading counts with SQL `COUNT(*)`, removed the unused direct `requests` dependency, and added the real backend package description.
 - Implemented Claude review analysis with the official Anthropic SDK, Pydantic structured output, configurable key/model, bounded timeout/retries, and consistent provider errors.
 - Added CSV and Excel bulk import plus filtered Excel and PDF report export; heavy file libraries load only when requested.
 - Added ngx-translate runtime i18n for English, Hindi, Japanese, Dutch, Korean, French, German, and Spanish.
@@ -22,7 +27,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Made paginator and sorter attachment resilient when history data renders asynchronously; added timestamp-aware date sorting and a filtered-empty table state.
 - Standardized frontend corner radii at a maximum of 12px, including Angular Material overlay surfaces.
 - Added centralized primary, secondary, semantic, surface, border, focus, shadow, and `color-mix()` theme tokens.
-- Added a fixed three-pixel global loading bar above the navbar; concurrent HTTP requests now use a counter instead of an unsafe boolean.
+- Added a fixed three-pixel global loading bar above the navbar; API-only request tokens now prevent static assets, duplicate completion, or synchronous interceptor failures from leaving it active.
 - Added a mobile review-history card layout while retaining the sortable desktop table and shared paginator.
 - Improved the footer with product identity, application navigation, technology summary, and responsive stacking.
 - Made dashboard summary cards and sections responsive down to narrow mobile widths and memoized dashboard statistics with an Angular computed signal.
@@ -34,6 +39,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Completed the frontend i18n pass across dashboard metrics, chart headings and tooltips, review forms/results, empty states, history cards/dialogs, import/export notices, validation errors, navigation accessibility text, and localized dates for all eight languages.
 - Reworked light/dark surfaces to use semantic theme tokens across dashboard sections, charts, review forms, cards, tables, dialogs, and Material overlays; refined the desktop navigation pill and mobile drawer header.
 - Redesigned PDF export as a dashboard-style branded report with the app logo, summary metrics, sentiment distribution, ranked themes, review cards, long-review continuation pages, and page numbering.
+- Strengthened CI with locked development tools, backend audit/lint/format/compile checks, frontend unit tests and production build, migration verification, merge-queue support, least-privilege permissions, timeouts, and one stable `CI required` gate for branch protection.
 
 ### Production fixes
 - Enabled SQLAlchemy `pool_pre_ping` and a five-minute `pool_recycle` for stale Neon connections.

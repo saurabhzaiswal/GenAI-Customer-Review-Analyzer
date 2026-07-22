@@ -56,15 +56,15 @@ Businesses receive customer feedback from many sources at once - Google Reviews,
 - Compact three-dot row action menu with a full review-details dialog and destructive-action confirmation
 - Responsive history presentation: sortable Material table on desktop and paginated review cards on mobile
 - Mobile navigation uses a left-to-right drawer with flat links, an inline language selector, theme control, and dismissible backdrop
-- CSV/Excel bulk review import and filtered Excel/PDF report export (libraries lazy-loaded on demand)
+- CSV/Excel bulk review import and filtered Excel/PDF report export (libraries lazy-loaded on demand); PDF labels follow the selected UI language and embedded Noto fonts preserve Hindi, Japanese, and Korean glyphs
 - Runtime ngx-translate i18n for English, Hindi, Japanese, Dutch, Korean, French, German, and Spanish
 - Persistent light/dark theme preference and language preference
-- Fixed, full-width top loading indicator backed by a concurrency-safe request counter
+- Fixed, full-width top loading indicator scoped to backend API requests and backed by per-request completion tokens
 - Dashboard: client-side summary stats plus Chart.js sentiment, theme, and trend charts with theme-aware, touch-friendly tooltips and concise value formatting
 
 The Reviews and Dashboard pages share the same dark navy-to-blue customer-intelligence hero treatment. Brand colors are centralized as `--primary-color`, `--secondary-color`, semantic tokens, and `color-mix()` derivatives. The `--radius` token is capped at `12px` and applied to application and Angular Material surfaces.
 
-SEO metadata in `index.html` includes descriptive title/description/keywords, robots directives, Open Graph and Twitter metadata, PWA metadata, and `WebApplication` JSON-LD structured data.
+SEO metadata in `index.html` includes a canonical production URL, descriptive title/description/keywords, robots directives, Open Graph and Twitter metadata, PWA metadata, and `WebApplication` JSON-LD structured data. Production `robots.txt` and `sitemap.xml` are served from `frontend/public`.
 
 ### Backend (FastAPI)
 - Clean, layered architecture: **Route → Service → AI Provider / Repository**, each with a single responsibility
@@ -284,11 +284,8 @@ This project demonstrates hands-on experience with:
 ##  Future Enhancements
 
 - JWT authentication, user accounts, role-based access control
-- CSV / Excel bulk import, PDF / Excel report export
-- GitHub Actions CI: Ruff, Black, Pytest, Angular build/tests (none configured yet)
 - Docker & Docker Compose (Angular + FastAPI + PostgreSQL + Redis)
 - Real-time streaming responses via WebSockets
-- Finish the `ClaudeProvider` implementation
 - Cloud deployment (AWS / Azure / GCP)
 
 ---

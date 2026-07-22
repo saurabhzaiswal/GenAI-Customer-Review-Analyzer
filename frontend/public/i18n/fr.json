@@ -88,6 +88,7 @@
     "excelExported": "Rapport Excel exporté.",
     "pdfExported": "Rapport PDF exporté."
   },
+  "report": { "subtitle": "Rapport d’analyse des avis clients", "generated": "Généré", "atAGlance": "Les avis en un coup d’œil", "reviewDetails": "Détails des avis", "recommendedAction": "Action recommandée", "fontLoadError": "La police PDF n’a pas pu être chargée. Veuillez réessayer." },
   "dashboard": {
     "eyebrow": "Intelligence client",
     "title": "Des retours qui deviennent action.",

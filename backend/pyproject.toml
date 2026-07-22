@@ -1,7 +1,7 @@
 [project]
 name = "genai-customer-review-analyzer"
 version = "0.1.0"
-description = "Add your description here"
+description = "AI-powered customer feedback analysis API with pluggable LLM providers"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -15,8 +15,14 @@ dependencies = [
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
-    "requests>=2.34.2",
     "sqlalchemy>=2.0.51",
     "uuid6>=2025.0.1",
     "uvicorn>=0.51.0",
+]
+
+[dependency-groups]
+dev = [
+    "pip-audit>=2.10.1",
+    "pytest>=9.1.1",
+    "ruff>=0.15.22",
 ]
