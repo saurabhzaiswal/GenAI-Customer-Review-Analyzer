@@ -32,7 +32,7 @@ class GeminiProvider(AIProvider):
 
             2. score must be an integer between 1 and 5.
 
-            3. theme must be a short phrase (1–3 words).
+            3. theme must be a short phrase (1-3 words).
 
             4. suggestion must be one concise sentence that provides a useful business recommendation.
 

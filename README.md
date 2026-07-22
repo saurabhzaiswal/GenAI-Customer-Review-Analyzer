@@ -38,10 +38,10 @@ Businesses receive customer feedback from many sources at once - Google Reviews,
 - Multi-provider AI layer behind a single interface (`AIProvider`), selected via `AI_PROVIDER`; Gemini, OpenAI, and Claude Messages API providers are implemented
 - Strict structured-JSON prompting (no markdown, no free text)
 - Sentiment classification: positive / neutral / negative
-- Sentiment score, 1–5
-- Primary theme extraction (short phrase, 1–3 words)
+- Sentiment score, 1-5
+- Primary theme extraction (short phrase, 1-3 words)
 - AI-generated business improvement suggestion
-- Confidence score (0.0–1.0)
+- Confidence score (0.0-1.0)
 - Prompt hardened against prompt injection, and against abusive/gibberish/empty input (falls back to a safe neutral result rather than erroring)
 
 ### Frontend (Angular 21)
@@ -64,7 +64,7 @@ Businesses receive customer feedback from many sources at once - Google Reviews,
 
 The Reviews and Dashboard pages share the same dark navy-to-blue customer-intelligence hero treatment. Brand colors are centralized as `--primary-color`, `--secondary-color`, semantic tokens, and `color-mix()` derivatives. The `--radius` token is capped at `12px` and applied to application and Angular Material surfaces.
 
-SEO metadata in `index.html` includes a canonical production URL, descriptive title/description/keywords, robots directives, Open Graph and Twitter metadata, PWA metadata, and `WebApplication` JSON-LD structured data. Production `robots.txt` and `sitemap.xml` are served from `frontend/public`.
+SEO metadata in `index.html` includes a canonical production URL, descriptive title/description/keywords, robots directives, large-image Open Graph and X/Twitter cards, PWA metadata, and `WebApplication` JSON-LD structured data. The route-aware `SeoService` uses `img/main.png` for the review landing page and `img/dashboard.png` for the dashboard while updating each route's title, description, canonical URL, and social image metadata. Production `robots.txt` and `sitemap.xml` are served from `frontend/public`.
 
 ### Backend (FastAPI)
 - Clean, layered architecture: **Route → Service → AI Provider / Repository**, each with a single responsibility
@@ -104,7 +104,7 @@ ReviewService (sanitize → orchestrate)
    OpenAI API       UUIDv7 primary keys)
 ```
 
-**Full detail - including the AI provider Factory pattern, the validation pipeline, the exception-handling flow, and the frontend call chain - lives in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).**
+**System context and production guidance live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Implementation-level classes, sequences, state ownership, database design, and scaling boundaries live in [`docs/LOW_LEVEL_DESIGN.md`](docs/LOW_LEVEL_DESIGN.md).**
 
 ---
 
@@ -231,9 +231,9 @@ Runs on `http://localhost:4200`.
 
 ## Production latency (Vercel + Render + Neon)
 
-The reported browser timings show slow first requests (about 17–32 seconds) followed by a warm history request around 500 ms. That pattern is consistent with cold starts: a sleeping Render service must start its Python process, and suspended Neon compute may also need to wake and establish a database connection. `analyze` also waits on the external AI model, so even a warm AI request is not guaranteed to finish in under one second.
+The reported browser timings show slow first requests (about 17-32 seconds) followed by a warm history request around 500 ms. That pattern is consistent with cold starts: a sleeping Render service must start its Python process, and suspended Neon compute may also need to wake and establish a database connection. `analyze` also waits on the external AI model, so even a warm AI request is not guaranteed to finish in under one second.
 
-The backend now enables `pool_pre_ping` and a five-minute `pool_recycle` so stale Neon connections are checked before use. This prevents dead pooled connections from causing avoidable failures, but it cannot remove hosting-provider wake-up time or model inference latency. For predictable latency, use an always-on Render instance and a Neon configuration that does not suspend.
+The backend enables `pool_pre_ping`, a five-minute `pool_recycle`, and LIFO pool reuse so stale Neon connections are checked and warm connections are preferred. Larger API responses are compressed, and the newest-first history query uses a `created_at` index. These measures cannot remove hosting-provider wake-up time or model inference latency. For predictable latency, use an always-on Render instance and a Neon configuration that does not suspend.
 
 The SQLAlchemy `Engine` is created once and acts as the shared, thread-safe pool (the equivalent of Go's `*sql.DB`). A `Session` is stateful and request-scoped; sharing it across concurrent requests can leak transactions and ORM state. Routes now depend on services rather than raw sessions, and `/reviews/analyze` has no database dependency.
 
@@ -256,12 +256,10 @@ While writing this documentation, I went through the real backend code end-to-en
 2. **`FeedbackResponse.id`** was typed `str`, but the ORM column is a native `uuid.UUID`; under Pydantic v2 this can raise a validation error when serializing straight from the SQLAlchemy model with `from_attributes=True`. Retyped as `UUID`. *(Fixed.)*
 3. **`middleware/logging.py`** used `print()` instead of the app's own configured `logger`. Switched to `logger.info(...)`, and it now also logs the response status code and request ID. *(Fixed.)*
 
-A few more things worth your attention (not changed, since they involve deletions or dependency/config choices that are yours to make - full detail in `docs/ARCHITECTURE.md` §9 and `CHANGELOG.md`):
+A few more things worth your attention:
 
 - The OpenAI and Anthropic providers use their official SDKs. Keep provider-specific keys in environment variables and never commit them.
-- `services/gemini_service.py` and `services/feedback_service.py` are unused, superseded duplicates of `services/ai/gemini_provider.py` and `services/review_service.py` - safe to delete.
 - `api/v1/review_routes.py` still has a large commented-out first draft above the live code - cleanup candidate.
-- `app/core/exceptions.py` defines an unused `register_exception_handlers()` - the handlers actually wired into `main.py` live in `app/exceptions/handlers.py` instead. Worth consolidating.
 - `middleware/cors.py` only allows a single origin (`settings.APP_URL`) - fine for one environment, but you'll want a list (e.g. local + deployed frontend) if you run more than one.
 - Root-level `test/` folder is an old, fully-commented-out Streamlit-era prototype - safe to delete.
 

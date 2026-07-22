@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.exceptions.custom_exceptions import AppException
 from app.utils.responses import error_response
+from app.utils.logger import logger
 
 
 def _response(message: str, status_code: int) -> JSONResponse:
@@ -34,6 +35,12 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 
 
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.exception(
+        "Unhandled request failure path=%s request_id=%s",
+        request.url.path,
+        getattr(request.state, "request_id", "unknown"),
+        exc_info=exc,
+    )
     return _response(
         "Something went wrong on our side. Please try again shortly.",
         status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -15,6 +15,7 @@ engine = create_engine(
     echo=settings.DEBUG,
     pool_pre_ping=True,
     pool_recycle=300,
+    pool_use_lifo=True,
 )
 
 

@@ -65,7 +65,7 @@
 
         <div class="result-list" *ngIf="reviewService.analysisResults().length > 0; else noAnalysis">
           <app-review-card
-            *ngFor="let result of reviewService.analysisResults()"
+            *ngFor="let result of reviewService.analysisResults(); trackBy: trackAnalysis"
             [result]="result"
           ></app-review-card>
         </div>

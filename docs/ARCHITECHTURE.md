@@ -70,7 +70,7 @@ flowchart LR
     A["POST /api/v1/reviews/analyze"] --> B["review_routes.py"]
     B --> C["Depends(get_review_service)"]
     C --> D["get_ai_provider()<br/>@lru_cache"]
-    C --> E["get_feedback_repository()<br/>@lru_cache"]
+    C --> E["get_feedback_repository()<br/>request-scoped Session"]
     D --> F["AIProviderFactory.create()"]
     F --> G{"settings.AI_PROVIDER"}
     G -- gemini --> H[GeminiProvider]
@@ -81,7 +81,7 @@ flowchart LR
     K --> L
 ```
 
-**Theory:** FastAPI's `Depends()` plus `@lru_cache` gives you **singleton dependency injection with almost no boilerplate** - `get_review_service()` is only ever actually constructed once per process, then reused. The **Factory pattern** (`AIProviderFactory.create()`) reads `AI_PROVIDER` from `.env` and returns the matching concrete class. Because both `ReviewService` and every route only depend on the abstract `AIProvider` type, swapping Gemini for OpenAI or Claude is a one-line config change - no route, service, or repository code changes at all. This is the **Dependency Inversion Principle** (the "D" in SOLID) in practice.
+**Theory:** FastAPI's `Depends()` plus `@lru_cache` reuses the stateless AI provider and database-free analysis service. Persistence dependencies are deliberately request-scoped because a SQLAlchemy `Session` owns transaction and identity-map state. The **Factory pattern** (`AIProviderFactory.create()`) reads `AI_PROVIDER` from `.env` and returns the matching concrete class. Routes and services depend on the abstract `AIProvider`, so provider selection remains a configuration change.
 
 ---
 
@@ -107,7 +107,7 @@ flowchart TD
 sequenceDiagram
     participant S as ReviewService
     participant P as AIProvider (concrete)
-    participant LLM as Gemini / OpenAI API
+    participant LLM as Gemini / OpenAI / Claude API
 
     S->>P: analyze_review(sanitized_text)
     P->>P: build rules-based prompt<br/>(label/score/theme/suggestion/confidence rules,<br/>prompt-injection guard, gibberish fallback)

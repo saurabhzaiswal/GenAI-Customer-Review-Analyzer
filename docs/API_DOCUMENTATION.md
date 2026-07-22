@@ -8,6 +8,16 @@ Base URL (local dev): `http://localhost:8000`
 
 All request/response models below come directly from `backend/app/schemas/feedback.py`.
 
+Review endpoint successes use the common envelope below. For readability, endpoint examples show the value placed inside `data` unless the full envelope is explicitly shown.
+
+```json
+{
+  "success": true,
+  "message": "Review analyzed successfully.",
+  "data": {}
+}
+```
+
 ---
 
 ## Health
@@ -64,10 +74,10 @@ Analyze a review **without** saving it.
 }
 ```
 - `label`: `"positive" | "neutral" | "negative"`
-- `score`: integer, 1–5
-- `theme`: short phrase (1–3 words)
+- `score`: integer, 1-5
+- `theme`: short phrase (1-3 words)
 - `suggestion`: string or `null`
-- `confidence`: float 0.0–1.0, or `null`
+- `confidence`: float 0.0-1.0, or `null`
 
 **Error responses**
 - `400` - empty/whitespace-only review after sanitization (`EmptyReviewException`)
@@ -171,7 +181,7 @@ Every error response, whether a known `AppException` subclass or an unhandled ex
 
 ## Authentication
 
-None yet. Every endpoint above is currently open - no API key, session, or JWT is required. See `docs/ARCHITECTURE.md` §9 for planned auth work.
+None yet. Every endpoint above is currently open—no API key, session, or JWT is required. See the [LLD security boundaries](./LOW_LEVEL_DESIGN.md#12-security-boundaries) for the current controls and recommended authentication boundary.
 
 ## Request tracing
 

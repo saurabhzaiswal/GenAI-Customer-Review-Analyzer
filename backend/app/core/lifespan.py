@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.utils.logger import logger
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -10,8 +12,8 @@ async def lifespan(app: FastAPI):
     and once when it shuts down.
     """
 
-    print("Starting GenAI Customer Review Analyzer...")
+    logger.info("Starting GenAI Customer Review Analyzer")
 
     yield
 
-    print("Shutting down...")
+    logger.info("Shutting down GenAI Customer Review Analyzer")
