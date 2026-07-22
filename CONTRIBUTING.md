@@ -87,6 +87,7 @@ The CI workflow runs Ruff checks/format verification for Python and the Angular 
 
 - Match the existing formatting style you see in the file you're editing.
 - Keep functions single-purpose - the whole backend is organized around the Single Responsibility Principle (see `docs/ARCHITECTURE.md`), and PRs that blur route/service/AI/repository boundaries will likely get a change request.
+- Keep [`docs/LOW_LEVEL_DESIGN.md`](docs/LOW_LEVEL_DESIGN.md) aligned when changing dependency lifetimes, state ownership, API sequences, persistence, or deployment flow.
 - Pull requests must pass the repository CI workflow: backend dependency audit, Ruff lint/format, compilation/tests, frontend tests/build, and the PostgreSQL migration check. Install the locked development tools with `uv sync --all-groups`.
 
 ## Protecting `master`

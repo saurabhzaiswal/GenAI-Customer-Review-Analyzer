@@ -37,35 +37,41 @@ export class DashboardPageComponent implements OnInit {
   protected readonly statistics = computed(() => {
     const feedback = this.savedFeedback();
     const total = feedback.length;
-    const sentimentCounts = {
-      positive: feedback.filter((item) => item.label === 'positive').length,
-      neutral: feedback.filter((item) => item.label === 'neutral').length,
-      negative: feedback.filter((item) => item.label === 'negative').length,
-    };
+    const aggregate = feedback.reduce(
+      (acc, item) => {
+        acc.sentimentCounts[item.label] += 1;
+        acc.scoreTotal += item.score;
+        acc.confidenceTotal += item.confidence ?? 0;
+        acc.themeCounts[item.theme] = (acc.themeCounts[item.theme] ?? 0) + 1;
+        return acc;
+      },
+      {
+        sentimentCounts: { positive: 0, neutral: 0, negative: 0 },
+        scoreTotal: 0,
+        confidenceTotal: 0,
+        themeCounts: {} as Record<string, number>,
+      },
+    );
 
-    const scores = feedback.map((item) => item.score);
-    const confidences = feedback.map((item) => item.confidence ?? 0);
-
-    const themeCounts = feedback.reduce<Record<string, number>>((acc, item) => {
-      acc[item.theme] = (acc[item.theme] ?? 0) + 1;
-      return acc;
-    }, {});
-
-    const sortedThemes = Object.entries(themeCounts).sort((a, b) => b[1] - a[1]);
+    const sortedThemes = Object.entries(aggregate.themeCounts).sort((a, b) => b[1] - a[1]);
 
     return {
       totalReviews: total,
-      positivePercent: total ? Math.round((sentimentCounts.positive / total) * 100) : 0,
-      neutralPercent: total ? Math.round((sentimentCounts.neutral / total) * 100) : 0,
-      negativePercent: total ? Math.round((sentimentCounts.negative / total) * 100) : 0,
-      averageScore: total ? Number((scores.reduce((sum, value) => sum + value, 0) / total).toFixed(1)) : 0,
+      positivePercent: total ? Math.round((aggregate.sentimentCounts.positive / total) * 100) : 0,
+      neutralPercent: total ? Math.round((aggregate.sentimentCounts.neutral / total) * 100) : 0,
+      negativePercent: total ? Math.round((aggregate.sentimentCounts.negative / total) * 100) : 0,
+      averageScore: total ? Number((aggregate.scoreTotal / total).toFixed(1)) : 0,
       averageConfidence: total
-        ? Number((confidences.reduce((sum, value) => sum + value, 0) / total).toFixed(2))
+        ? Number((aggregate.confidenceTotal / total).toFixed(2))
         : 0,
       topTheme: sortedThemes[0]?.[0] ?? 'N/A',
       topThemes: sortedThemes.slice(0, 5),
-      sentimentCounts,
-      themeCounts,
+      sentimentCounts: aggregate.sentimentCounts,
+      themeCounts: aggregate.themeCounts,
     };
   });
+
+  protected trackTheme(_: number, theme: [string, number]): string {
+    return theme[0];
+  }
 }

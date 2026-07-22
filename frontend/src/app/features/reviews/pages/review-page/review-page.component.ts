@@ -10,6 +10,7 @@ import { ReviewService } from '@app/features/reviews/services/review.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
+import { AnalysisResponse } from '@app/features/reviews/models/analysis-response';
 
 @Component({
   standalone: true,
@@ -50,5 +51,9 @@ export class ReviewPageComponent {
 
   protected clearResults(): void {
     this.reviewService.clearSessionResults();
+  }
+
+  protected trackAnalysis(_: number, result: AnalysisResponse): string {
+    return `${result.review}:${result.theme}:${result.score}`;
   }
 }

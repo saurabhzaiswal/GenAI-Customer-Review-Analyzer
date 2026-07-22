@@ -19,6 +19,7 @@ Angular 21 frontend for the GenAI Customer Review Analyzer. It provides customer
 - Dashboard-style jsPDF reports with product branding, summary metrics, sentiment bars, ranked themes, paginated review cards, long-review continuation handling, selected-language labels, and locale-specific embedded Noto fonts
 - Source-root TypeScript aliases (`@app/*` and `@env/*`) replace fragile parent-traversal imports
 - Bounded three-request batch concurrency and a shared in-flight history cache reduce waiting and duplicate API work
+- Cached filter parsing, stable list tracking, one-pass dashboard aggregation, and cached PDF font conversion reduce repeated client work
 - Canonical metadata, `robots.txt`, and `sitemap.xml` use the production Vercel URL
 - Maximum 12px radius for buttons, fields, cards, containers, and Material overlays
 - Flat mobile navigation drawer with inline languages, theme control, backdrop dismissal, and no nested popovers
@@ -50,3 +51,5 @@ npm test
 ```
 
 When changing `ReviewHistoryComponent`, verify search and each filter both independently and together, change page sizes, navigate pages, sort every column, open View details, cancel deletion, and confirm deletion.
+
+See [`../docs/LOW_LEVEL_DESIGN.md`](../docs/LOW_LEVEL_DESIGN.md) for frontend state ownership, class relationships, request sequences, export flow, and performance decisions.

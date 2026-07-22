@@ -52,7 +52,7 @@
     <section class="dashboard-section dashboard-section--themes" aria-labelledby="themes-heading">
       <div class="section-heading"><div><p class="eyebrow">{{ 'dashboard.topics' | translate }}</p><h2 id="themes-heading">{{ 'dashboard.talkAbout' | translate }}</h2></div><p>{{ 'dashboard.topicsHelp' | translate }}</p></div>
       <div class="theme-list">
-        <div class="theme-list__item" *ngFor="let theme of statistics().topThemes; let index = index">
+        <div class="theme-list__item" *ngFor="let theme of statistics().topThemes; let index = index; trackBy: trackTheme">
           <span class="theme-list__rank">0{{ index + 1 }}</span>
           <strong>{{ theme[0] }}</strong>
           <span class="theme-list__count">{{ theme[1] }} {{ (theme[1] === 1 ? 'dashboard.mention' : 'dashboard.mentions') | translate }}</span>

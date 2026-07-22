@@ -57,6 +57,7 @@ interface ReviewFilter {
   ],
 })
 export class ReviewHistoryComponent implements OnChanges {
+  private static readonly pdfFontData = new Map<string, Promise<string>>();
   @Input() savedReviews: Feedback[] = [];
   @Output() deleteFeedback = new EventEmitter<string>();
 
@@ -292,14 +293,20 @@ export class ReviewHistoryComponent implements OnChanges {
     const font = fonts[locale];
     if (!font) return 'helvetica';
 
-    const response = await fetch(`/fonts/${font.file}`);
-    if (!response.ok) throw new Error(`Unable to load PDF font: ${font.file}`);
-    const bytes = new Uint8Array(await response.arrayBuffer());
-    let binary = '';
-    for (let offset = 0; offset < bytes.length; offset += 0x8000) {
-      binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+    let fontData = ReviewHistoryComponent.pdfFontData.get(font.file);
+    if (!fontData) {
+      fontData = fetch(`/fonts/${font.file}`).then(async (response) => {
+        if (!response.ok) throw new Error(`Unable to load PDF font: ${font.file}`);
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        let binary = '';
+        for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+          binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+        }
+        return btoa(binary);
+      });
+      ReviewHistoryComponent.pdfFontData.set(font.file, fontData);
     }
-    document.addFileToVFS(font.file, btoa(binary));
+    document.addFileToVFS(font.file, await fontData);
     document.addFont(font.file, font.family, 'normal');
     document.addFont(font.file, font.family, 'bold');
     return font.family;
@@ -336,8 +343,14 @@ export class ReviewHistoryComponent implements OnChanges {
   }
 
   private createFilterPredicate(): (data: Feedback, filter: string) => boolean {
+    let previousFilter = '';
+    let parsed: ReviewFilter = { search: '', sentiment: 'all', theme: 'all', minScore: 0 };
+
     return (data: Feedback, filter: string) => {
-      const parsed: ReviewFilter = JSON.parse(filter);
+      if (filter !== previousFilter) {
+        parsed = JSON.parse(filter) as ReviewFilter;
+        previousFilter = filter;
+      }
       const searchText = parsed.search.trim().toLowerCase();
 
       const matchesSearch =
@@ -353,5 +366,13 @@ export class ReviewHistoryComponent implements OnChanges {
 
       return matchesSearch && matchesSentiment && matchesTheme && matchesScore;
     };
+  }
+
+  protected trackFeedback(_: number, item: Feedback): string {
+    return item.id;
+  }
+
+  protected trackTheme(_: number, theme: string): string {
+    return theme;
   }
 }

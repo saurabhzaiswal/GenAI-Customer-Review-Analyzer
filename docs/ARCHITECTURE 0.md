@@ -73,7 +73,7 @@ Each layer has exactly one job:
 | Layer | File(s) | Responsibility |
 |---|---|---|
 | Controller | `app/api/v1/review_routes.py`, `app/api/health_routes.py` | Parse/validate the HTTP request, call the service, return the response model. No business logic. |
-| Dependency wiring | `app/dependencies/services.py` | Builds singletons (`lru_cache`) for the AI provider, repository, and service, and hands them to routes via `Depends()`. |
+| Dependency wiring | `app/dependencies/services.py` | Caches the AI provider and database-free service; builds repository-backed services per request so each owns a request session. |
 | Service | `app/services/review_service.py` | Orchestrates sanitization → AI analysis → persistence. The only place that knows the *order* of operations. |
 | AI layer | `app/services/ai/*` | Talks to an LLM only. Nothing here knows about HTTP or the database. |
 | Repository | `app/repositories/feedback_repository.py` | Talks to PostgreSQL only, via SQLAlchemy. Nothing here knows about HTTP or the AI provider. |
@@ -134,10 +134,10 @@ Table: `feedbacks` (see `app/models/feedback.py` and Alembic revision `d79f95d19
 | `id` | `UUID` (Postgres native) | Primary key, default generated via `uuid6.uuid7()` - time-sortable, better index locality than UUIDv4. |
 | `review` | `Text` | Sanitized review text (not the raw client input). |
 | `label` | `String(20)` | `"positive" \| "neutral" \| "negative"`. |
-| `score` | `Integer` | 1–5. |
-| `theme` | `String(100)` | Short AI-extracted phrase (1–3 words). |
+| `score` | `Integer` | 1-5. |
+| `theme` | `String(100)` | Short AI-extracted phrase (1-3 words). |
 | `suggestion` | `Text`, nullable | AI-generated business suggestion. |
-| `confidence` | `Float`, nullable | 0.0–1.0. |
+| `confidence` | `Float`, nullable | 0.0-1.0. |
 | `created_at` | `DateTime(timezone=True)` | `server_default=func.now()`. |
 | `updated_at` | `DateTime(timezone=True)` | `server_default` + `onupdate=func.now()`. |
 
@@ -189,7 +189,7 @@ Both `AppException` and the generic `Exception` are registered as FastAPI except
 }
 ```
 
-> Note: `app/core/exceptions.py` also defines a `register_exception_handlers()` function, but it is **not** called anywhere - the handlers actually wired up in `main.py` come from `app/exceptions/handlers.py`. The two similarly-named files are a cleanup candidate (see `CHANGELOG.md`).
+Exception handlers are defined only in `app/exceptions/handlers.py` and registered by `main.py`.
 
 ## 7. Middleware stack
 

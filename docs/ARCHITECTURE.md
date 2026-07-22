@@ -2,6 +2,8 @@
 
 This is the canonical architecture note. The similarly named older files are retained as historical design drafts.
 
+For implementation-level class diagrams, sequence diagrams, state ownership, persistence details, and scaling boundaries, see [`LOW_LEVEL_DESIGN.md`](./LOW_LEVEL_DESIGN.md).
+
 ## Request flow
 
 ```text
@@ -27,9 +29,9 @@ FastAPI constructs these dependencies in `app/dependencies/services.py`. Route h
 
 ## Production latency
 
-The observed 17–32 second first requests followed by a roughly 500 ms request are consistent with cold/warm infrastructure behavior. Render may start the Python service, Neon may resume compute for persistence calls, and Gemini adds network and inference time. Browser timing alone cannot assign exact seconds to each layer. Compare `/health` (Render), `/history` (Render + Neon), and `/analyze` (Render + AI) after idle and while warm.
+The observed 17-32 second first requests followed by a roughly 500 ms request are consistent with cold/warm infrastructure behavior. Render may start the Python service, Neon may resume compute for persistence calls, and Gemini adds network and inference time. Browser timing alone cannot assign exact seconds to each layer. Compare `/health` (Render), `/history` (Render + Neon), and `/analyze` (Render + AI) after idle and while warm.
 
-`pool_pre_ping` and `pool_recycle=300` protect against stale Neon connections. They cannot eliminate provider cold starts. A strict sub-second target requires always-on infrastructure and may still be unrealistic for synchronous LLM inference.
+`pool_pre_ping`, `pool_recycle=300`, and LIFO pool reuse protect against stale Neon connections while preferring recently used connections. GZip reduces larger JSON responses, and `ix_feedbacks_created_at` supports newest-first history reads. These measures cannot eliminate provider cold starts. A strict sub-second target requires always-on infrastructure and may still be unrealistic for synchronous LLM inference.
 
 ## Error flow
 

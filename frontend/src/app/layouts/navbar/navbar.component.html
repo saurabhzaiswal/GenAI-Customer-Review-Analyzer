@@ -33,7 +33,7 @@
     </nav>
 
     <mat-menu #languageMenu="matMenu">
-      <button mat-menu-item *ngFor="let language of preferences.languages" (click)="preferences.setLanguage(language.code)">
+      <button mat-menu-item *ngFor="let language of preferences.languages; trackBy: trackLanguage" (click)="preferences.setLanguage(language.code)">
         <mat-icon>{{ preferences.language() === language.code ? 'check' : 'translate' }}</mat-icon>
         <span>{{ language.nativeLabel }}</span>
       </button>
@@ -59,7 +59,7 @@
   <section class="mobile-drawer__section" [attr.aria-label]="'nav.language' | translate">
     <h2><mat-icon>language</mat-icon>{{ 'nav.language' | translate }}</h2>
     <div class="language-grid">
-      <button *ngFor="let language of preferences.languages" type="button" (click)="preferences.setLanguage(language.code)" [class.language-option--active]="preferences.language() === language.code">
+      <button *ngFor="let language of preferences.languages; trackBy: trackLanguage" type="button" (click)="preferences.setLanguage(language.code)" [class.language-option--active]="preferences.language() === language.code">
         <mat-icon>{{ preferences.language() === language.code ? 'check' : 'translate' }}</mat-icon>{{ language.nativeLabel }}
       </button>
     </div>

@@ -20,7 +20,7 @@
       <mat-label>{{ 'history.theme' | translate }}</mat-label>
       <mat-select [formControl]="themeControl" (selectionChange)="applyFilters()">
         <mat-option value="all">{{ 'history.all' | translate }}</mat-option>
-        <mat-option *ngFor="let theme of availableThemes" [value]="theme">{{ theme }}</mat-option>
+        <mat-option *ngFor="let theme of availableThemes; trackBy: trackTheme" [value]="theme">{{ theme }}</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -107,7 +107,7 @@
     </div>
 
     <div class="history-card-list" [attr.aria-label]="'history.cards' | translate">
-      <article class="history-card" *ngFor="let item of mobilePageReviews">
+      <article class="history-card" *ngFor="let item of mobilePageReviews; trackBy: trackFeedback">
         <div class="history-card__header">
           <app-sentiment-badge [label]="item.label" [score]="item.score"></app-sentiment-badge>
           <button mat-icon-button type="button" [attr.aria-label]="'history.openActions' | translate" [matMenuTriggerFor]="mobileActions">

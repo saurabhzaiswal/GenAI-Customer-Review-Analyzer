@@ -6,6 +6,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- Added a viewable low-level design with Mermaid class, sequence, data, middleware, export, deployment, and CI diagrams.
+- Optimized dashboard aggregation to one pass, cached table-filter parsing and PDF font conversion, and added stable list tracking.
+- Added GZip responses, LIFO database-pool reuse, a newest-first history index, and structured lifecycle/unhandled-error logging.
+- Removed unused legacy Gemini/feedback services, duplicate exception registration, and the unused spinner component.
 - Replaced frontend parent-traversal imports with `@app/*` and `@env/*` source-root aliases.
 - Localized the existing native jsPDF dashboard report labels and dates, with self-hosted Noto fonts for correct Hindi, Japanese, and Korean glyph encoding.
 - Added bounded batch-analysis concurrency and history request caching while preserving result order.
@@ -53,9 +57,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `LoggingMiddleware` used `print()` instead of the app's configured `logger` (`app/utils/logger.py`). Switched to `logger.info(...)` and added status code + request ID to the log line.
 
 ### Known issues / recommended next fixes (not yet applied)
-- `services/gemini_service.py` and `services/feedback_service.py` are superseded, unused duplicates of `services/ai/gemini_provider.py` and `services/review_service.py`. Safe to delete.
 - `middleware/cors.py` allows only a single origin (`settings.APP_URL`). Fine for one environment; consider a comma-separated `CORS_ORIGINS` env var if you need to allow both a local and deployed frontend at once.
-- `app/core/exceptions.py` (an unused `register_exception_handlers`) and `app/core/security.py` (empty placeholder) exist but aren't wired into `main.py` - the real exception handlers live in `app/exceptions/handlers.py`. Worth consolidating so the two similarly-named modules don't confuse future contributors.
+- `app/core/security.py` is an empty placeholder; authentication and tenant isolation remain future work.
 - Root-level `test/` folder contains an early, fully-commented-out Streamlit-era prototype (`api.py`, `model.py`). Historically interesting, functionally dead - candidate for deletion or moving into `docs/` as a "how it started" note.
 
 ## Project history (reconstructed from development notes)
@@ -90,6 +93,5 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Planned (not yet implemented)
 - JWT authentication & role-based access control (`core/security.py` currently empty).
-- CI pipeline: GitHub Actions running Ruff, Black, Pytest, and Angular build/tests (nothing configured yet).
 - Docker & Docker Compose for Angular + FastAPI + PostgreSQL + Redis.
 - Real-time streaming responses.

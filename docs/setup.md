@@ -12,7 +12,7 @@
 
 </div>
 
-> **This is an LLM project?** The whole point of the app is that a **Large Language Model reads a raw customer review and returns structured JSON** - sentiment label, 1–5 score, theme, an improvement suggestion, and a confidence value. FastAPI, PostgreSQL, and Angular exist purely to get text *into* that LLM call and to store/display what comes back. This guide sets that up end-to-end, in four different dev environments.
+> **This is an LLM project?** The whole point of the app is that a **Large Language Model reads a raw customer review and returns structured JSON** - sentiment label, 1-5 score, theme, an improvement suggestion, and a confidence value. FastAPI, PostgreSQL, and Angular exist purely to get text *into* that LLM call and to store/display what comes back. This guide sets that up end-to-end, in four different dev environments.
 
 ---
 
@@ -281,7 +281,7 @@ This repo doesn't currently ship a `.devcontainer/devcontainer.json`, so there a
 
 1. On GitHub: **Code** → **Codespaces** → **Create codespace on main**.
 2. Codespaces gives you a Linux container with a terminal. Install `uv` and Node if the default image lacks the right versions (most `universal` images already have Node; add `uv` via the curl installer from Section 1).
-3. Run the same commands as Section 3–7 inside the Codespace terminal.
+3. Run the same commands as Section 3-7 inside the Codespace terminal.
 4. Codespaces auto-detects the ports FastAPI (8000) and Angular (4200) bind to and offers to forward them - click **Open in Browser** on the **Ports** tab, or make port 4200 **Public** if you want to share a live link.
 5. **Don't commit your `.env`.** Store `AI_API_KEY` and `DATABASE_URL` as a **Codespaces secret** instead: repo **Settings → Secrets and variables → Codespaces → New repository secret**. They'll be injected as environment variables automatically on next rebuild; your `.env` can then just reference `${AI_API_KEY}` or you `export` them before running.
 
@@ -319,7 +319,7 @@ Commit that file and every future Codespace boots pre-configured - no manual ins
    coder config-ssh
    code --remote ssh-remote+coder.<workspace-name> /path/to/GenAI-Customer-Review-Analyzer
    ```
-3. Inside the workspace terminal, run Sections 3–7 exactly as on a local machine.
+3. Inside the workspace terminal, run Sections 3-7 exactly as on a local machine.
 4. Expose ports through Coder's **port forwarding** (workspace apps in the dashboard, or `coder port-forward <workspace> --tcp 8000:8000 --tcp 4200:4200` from your local machine).
 5. Store `AI_API_KEY` / `DATABASE_URL` as **Coder workspace parameters** or template-level secrets rather than committing them, same principle as Codespaces.
 
@@ -345,7 +345,7 @@ Cursor is a VS Code fork, so almost everything in Section 8 applies unchanged:
 | `psycopg.OperationalError: connection refused` | Postgres isn't running, or `DATABASE_URL` is wrong | Start Postgres; confirm host/port/user/password/db name match |
 | CORS error in the browser console | `APP_URL` in `.env` doesn't match the Angular origin | Set `APP_URL=http://localhost:4200` (or your Codespace/Coder forwarded URL) |
 | `The AI analysis service is temporarily unavailable` | Bad key, quota/rate limit, provider outage, or network failure | Check Render logs, the API key, quota, and model; retry transient failures |
-| First production request takes 15–30+ seconds | Render and/or Neon woke from idle; AI inference adds latency | Use always-on hosting; compare cold and warm timings for `/health`, `/history`, and `/analyze` |
+| First production request takes 15-30+ seconds | Render and/or Neon woke from idle; AI inference adds latency | Use always-on hosting; compare cold and warm timings for `/health`, `/history`, and `/analyze` |
 | `Unsupported AI Provider: ...` | Typo in `AI_PROVIDER` | Use exactly `gemini`, `openai`, or `claude` |
 | Angular can't reach the API | `apiBaseUrl` in `environment.development.ts` points somewhere wrong, or backend isn't running | Confirm backend is up on 8000 and the environment file matches |
 | Alembic says table already exists / out of sync | Migrations run out of order or DB was created manually | `uv run alembic current` to check state, or drop and recreate the dev DB |
