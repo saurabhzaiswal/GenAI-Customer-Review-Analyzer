@@ -5,7 +5,7 @@ name: CI
 # - On every pull request targeting master (catches problems BEFORE merge)
 on:
   push:
-    branches: - "**"
+    branches: ["**"]
   pull_request:
     branches: [master]
 
