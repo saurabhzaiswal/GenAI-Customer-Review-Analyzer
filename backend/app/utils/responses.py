@@ -18,4 +18,5 @@ def error_response(
     return {
         "success": False,
         "message": message,
+        "data": None,
     }

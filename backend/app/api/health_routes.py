@@ -1,8 +1,11 @@
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter
 
 from app.core.config import settings
+from app.schemas.api_response import ApiResponse
+from app.utils.responses import success_response
 
 router = APIRouter(tags=["Health"])
 
@@ -10,12 +13,12 @@ router = APIRouter(tags=["Health"])
 app_started_at = datetime.now(UTC)
 
 
-@router.get("/")
+@router.get("/", response_model=ApiResponse[dict[str, Any]])
 def health_check():
     now = datetime.now(UTC)
     uptime = now - app_started_at
 
-    return {
+    payload = {
         "status": "healthy",
         "application": settings.APP_NAME,
         "version": settings.APP_VERSION,
@@ -23,9 +26,15 @@ def health_check():
         "uptime_seconds": int(uptime.total_seconds()),
     }
 
+    return success_response(
+        data=payload,
+        message="Health check passed.",
+    )
 
-@router.get("/health")
+
+@router.get("/health", response_model=ApiResponse[dict[str, str]])
 def health():
-    return {
-        "status": "ok",
-    }
+    return success_response(
+        data={"status": "ok"},
+        message="Health is OK.",
+    )

@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import RequestValidationError
 
 from app.api.health_routes import router as health_router
 from app.api.v1.review_routes import router as review_router
@@ -15,6 +16,8 @@ from app.exceptions.custom_exceptions import AppException
 from app.exceptions.handlers import (
     app_exception_handler,
     global_exception_handler,
+    http_exception_handler,
+    validation_exception_handler,
 )
 
 
@@ -42,6 +45,8 @@ app.add_exception_handler(
     Exception,
     global_exception_handler,
 )
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
 
 # Routes
 app.include_router(health_router)
