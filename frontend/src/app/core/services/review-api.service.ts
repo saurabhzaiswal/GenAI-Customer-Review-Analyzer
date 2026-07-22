@@ -21,7 +21,7 @@ export class ReviewApiService {
     return this.apiService.get<Feedback[]>('/reviews/history');
   }
 
-  deleteFeedback(feedbackId: string): Observable<void> {
-    return this.apiService.delete<void>(`/reviews/${feedbackId}`);
+  deleteFeedback(feedbackId: string): Observable<Feedback> {
+    return this.apiService.delete<Feedback>(`/reviews/${feedbackId}`);
   }
 }

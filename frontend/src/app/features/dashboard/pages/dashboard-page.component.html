@@ -1,98 +1,72 @@
 <div class="dashboard-shell">
-    <app-page-header
-      title="Analytics Dashboard"
-      subtitle="Monitor sentiment trends, theme frequency, and review volume from saved customer feedback."
-      [showLogo]="true"
-    ></app-page-header>
-
   <mat-progress-bar *ngIf="loading()" mode="indeterminate"></mat-progress-bar>
 
-  <section *ngIf="savedFeedback().length > 0; else noData">
-    <div class="dashboard-overview">
-      <div class="dashboard-summary">
-        <app-stats-card
-          title="Total Reviews"
-          [value]="statistics.totalReviews.toString()"
-          description="Total saved reviews"
-        ></app-stats-card>
+  <section *ngIf="savedFeedback().length > 0; else noData" class="dashboard-content">
+    <header class="dashboard-hero">
+      <div class="dashboard-hero__copy">
+        <p class="dashboard-hero__eyebrow"><mat-icon aria-hidden="true">insights</mat-icon> Customer intelligence</p>
+        <h1>Feedback, made actionable.</h1>
+        <p>Track how customers feel, what they mention most, and where your team should focus next.</p>
+      </div>
+      <div class="dashboard-hero__summary" aria-label="Top customer feedback metrics">
+        <div><span>Reviews analyzed</span><strong>{{ statistics.totalReviews }}</strong></div>
+        <div><span>Average score</span><strong>{{ statistics.averageScore }}<small>/5</small></strong></div>
+        <div><span>Positive sentiment</span><strong>{{ statistics.positivePercent }}<small>%</small></strong></div>
+      </div>
+    </header>
 
-        <app-stats-card
-          title="Positive"
-          [value]="statistics.positivePercent + '%'"
-          description="Positive sentiment share"
-        ></app-stats-card>
-
-        <app-stats-card
-          title="Neutral"
-          [value]="statistics.neutralPercent + '%'"
-          description="Neutral sentiment share"
-        ></app-stats-card>
-
-        <app-stats-card
-          title="Negative"
-          [value]="statistics.negativePercent + '%'"
-          description="Negative sentiment share"
-        ></app-stats-card>
-
-        <app-stats-card
-          title="Average Score"
-          [value]="statistics.averageScore.toString()"
-          description="Average sentiment score"
-        ></app-stats-card>
-
-        <app-stats-card
-          title="Avg Confidence"
-          value="{{ statistics.averageConfidence | percent:'1.0-0' }}"
-          description="Mean model confidence"
-        ></app-stats-card>
-
-        <app-stats-card
-          title="Top Theme"
-          [value]="statistics.topTheme"
-          description="Most mentioned theme"
-          [highlight]="true"
-        ></app-stats-card>
+    <section class="dashboard-section" aria-labelledby="overview-heading">
+      <div class="section-heading">
+        <div><p class="eyebrow">Overview</p><h2 id="overview-heading">Customer pulse</h2></div>
+        <p>Here’s the signal across every saved review.</p>
       </div>
 
-      <mat-card class="themes-card">
-        <div class="themes-card__header">
-          <h3>Most common themes</h3>
-          <p>Spot recurring topics across customer feedback at a glance.</p>
-        </div>
-        <mat-chip-set aria-label="Most common themes">
-          <mat-chip *ngFor="let theme of statistics.topThemes">{{ theme[0] }} · {{ theme[1] }}</mat-chip>
-        </mat-chip-set>
-      </mat-card>
-    </div>
+      <div class="pulse-grid">
+        <article class="pulse-card pulse-card--theme">
+          <span class="pulse-card__icon"><mat-icon aria-hidden="true">auto_awesome</mat-icon></span>
+          <p>Top conversation</p>
+          <h3>{{ statistics.topTheme }}</h3>
+          <span class="pulse-card__hint">Most mentioned customer theme</span>
+        </article>
+        <article class="pulse-card">
+          <span class="pulse-card__icon pulse-card__icon--green"><mat-icon aria-hidden="true">sentiment_satisfied</mat-icon></span>
+          <p>Positive</p><h3>{{ statistics.positivePercent }}%</h3><span class="pulse-card__hint">Satisfied customers</span>
+        </article>
+        <article class="pulse-card">
+          <span class="pulse-card__icon pulse-card__icon--amber"><mat-icon aria-hidden="true">sentiment_neutral</mat-icon></span>
+          <p>Neutral</p><h3>{{ statistics.neutralPercent }}%</h3><span class="pulse-card__hint">Mixed feedback</span>
+        </article>
+        <article class="pulse-card">
+          <span class="pulse-card__icon pulse-card__icon--rose"><mat-icon aria-hidden="true">sentiment_dissatisfied</mat-icon></span>
+          <p>Negative</p><h3>{{ statistics.negativePercent }}%</h3><span class="pulse-card__hint">Needs attention</span>
+        </article>
+      </div>
+    </section>
 
-    <section class="dashboard-charts">
+    <section class="dashboard-section dashboard-section--analytics" aria-labelledby="analytics-heading">
+      <div class="section-heading">
+        <div><p class="eyebrow">Analytics</p><h2 id="analytics-heading">Trends at a glance</h2></div>
+        <p>Follow sentiment, recurring topics, and feedback volume over time.</p>
+      </div>
       <app-analytics-charts [reviews]="savedFeedback()"></app-analytics-charts>
     </section>
 
-    <section class="dashboard-history">
-      <mat-card class="dashboard-history-card">
-        <div class="dashboard-history__header">
-          <div>
-            <p class="eyebrow">Review history</p>
-            <h2>Saved customer feedback</h2>
-          </div>
-          <p class="dashboard-history__description">
-            Filter, examine, and remove saved review records directly from your analytics workspace.
-          </p>
+    <section class="dashboard-section dashboard-section--themes" aria-labelledby="themes-heading">
+      <div class="section-heading"><div><p class="eyebrow">Topics</p><h2 id="themes-heading">What customers talk about</h2></div><p>Each theme is ranked by how often it appears in saved feedback.</p></div>
+      <div class="theme-list">
+        <div class="theme-list__item" *ngFor="let theme of statistics.topThemes; let index = index">
+          <span class="theme-list__rank">0{{ index + 1 }}</span>
+          <strong>{{ theme[0] }}</strong>
+          <span class="theme-list__count">{{ theme[1] }} {{ theme[1] === 1 ? 'mention' : 'mentions' }}</span>
         </div>
+      </div>
+    </section>
 
-        <app-review-history
-          [savedReviews]="savedFeedback()"
-          (deleteFeedback)="onDeleteFeedback($event)"
-        ></app-review-history>
-      </mat-card>
+    <section class="dashboard-history" aria-labelledby="history-heading">
+      <div class="section-heading section-heading--history"><div><p class="eyebrow">Review history</p><h2 id="history-heading">Saved customer feedback</h2></div><p>Search, filter, and manage each saved customer review.</p></div>
+      <app-review-history [savedReviews]="savedFeedback()" (deleteFeedback)="onDeleteFeedback($event)"></app-review-history>
     </section>
   </section>
 
-  <ng-template #noData>
-    <app-empty-state
-      title="No saved reviews yet"
-      description="Analyze customer feedback on the Reviews page and save results to unlock analytics here."
-    ></app-empty-state>
-  </ng-template>
+  <ng-template #noData><app-empty-state title="No saved reviews yet" description="Analyze customer feedback on the Reviews page and save results to unlock analytics here."></app-empty-state></ng-template>
 </div>

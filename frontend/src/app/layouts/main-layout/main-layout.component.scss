@@ -3,9 +3,9 @@
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 28%),
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.1), transparent 32%),
-    #eef2ff;
+    radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.13), transparent 28%),
+    radial-gradient(circle at 6% 15%, rgba(59, 130, 246, 0.11), transparent 30%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4ff 52%, #f8fafc 100%);
 }
 
 .layout-content {
@@ -15,5 +15,5 @@
 .page-container {
   width: min(1300px, 100%);
   margin: 0 auto;
-  padding: clamp(1rem, 2.5vw, 1.75rem) clamp(0.85rem, 2vw, 1.25rem) 2rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 1.5rem) 2.5rem;
 }

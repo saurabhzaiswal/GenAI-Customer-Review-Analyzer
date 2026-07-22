@@ -1,6 +1,6 @@
 <div class="page-shell">
   <app-page-header
-    title=""
+    title="Customer review intelligence"
     subtitle="Paste customer reviews (one per line), analyze sentiment with Gemini, and track insights over time."
     [showLogo]="true"
   ></app-page-header>
@@ -80,16 +80,20 @@
         </ng-template>
       </section>
     </section>
-
-    <aside class="page-sidebar">
-      <div class="page-sidebar__header">
-        <h2>Saved history</h2>
-        <span>{{ reviewService.savedFeedback().length }} saved</span>
-      </div>
-      <app-review-history
-        [savedReviews]="reviewService.savedFeedback()"
-        (deleteFeedback)="onDeleteFeedback($event)"
-      ></app-review-history>
-    </aside>
   </div>
+
+  <section class="saved-history-section">
+    <div class="saved-history-section__header">
+      <div>
+        <p class="eyebrow">Saved feedback</p>
+        <h2>Review history</h2>
+        <p>Search, filter, and manage the feedback you have saved for ongoing analysis.</p>
+      </div>
+      <span class="saved-history-section__count">{{ reviewService.savedFeedback().length }} saved</span>
+    </div>
+    <app-review-history
+      [savedReviews]="reviewService.savedFeedback()"
+      (deleteFeedback)="onDeleteFeedback($event)"
+    ></app-review-history>
+  </section>
 </div>

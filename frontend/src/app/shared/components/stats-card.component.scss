@@ -1,39 +1,17 @@
-.stats-card {
-  border-radius: var(--radius);
-  min-height: 130px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-}
-
-.stats-card--highlight {
-  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
-  color: white;
-
-  .stats-card__description {
-    color: rgba(255, 255, 255, 0.85);
-  }
-}
-
-.stats-card__content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.25rem;
-}
-
-.stats-card__title {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: inherit;
-}
-
-.stats-card__value {
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.stats-card__description {
-  color: rgba(15, 23, 42, 0.75);
-  font-size: 0.9rem;
-}
+.stats-card { border-radius: var(--radius); min-height: 145px; display: grid; place-items: stretch; background: linear-gradient(145deg, #ffffff, #f8fbff); border: 1px solid rgba(148, 163, 184, 0.16); box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.stats-card:hover { transform: translateY(-2px); box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1); }
+.stats-card__content { display: flex; flex-direction: column; gap: 0.55rem; padding: 0.95rem; }
+.stats-card__topline { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.stats-card__title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: inherit; font-weight: 800; }
+.stats-card__icon { display: inline-grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 10px; }
+.stats-card__icon mat-icon { width: 1.15rem; height: 1.15rem; font-size: 1.15rem; }
+.stats-card__value { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 750; line-height: 1.1; letter-spacing: -0.03em; }
+.stats-card__description { color: rgba(15, 23, 42, 0.75); font-size: 0.86rem; }
+.stats-card--blue .stats-card__icon { background: #eff6ff; color: #2563eb; }
+.stats-card--green .stats-card__icon { background: #ecfdf5; color: #059669; }
+.stats-card--amber .stats-card__icon { background: #fffbeb; color: #d97706; }
+.stats-card--rose .stats-card__icon { background: #fff1f2; color: #e11d48; }
+.stats-card--cyan .stats-card__icon { background: #ecfeff; color: #0891b2; }
+.stats-card--highlight { background: linear-gradient(135deg, #0ea5e9, #38bdf8); color: #ffffff; border-color: transparent; }
+.stats-card--highlight .stats-card__description { color: rgba(255, 255, 255, 0.86); }
+.stats-card--highlight .stats-card__icon { background: rgba(255, 255, 255, 0.18); color: #ffffff; }

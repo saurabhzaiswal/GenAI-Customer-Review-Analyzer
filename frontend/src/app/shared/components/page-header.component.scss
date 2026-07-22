@@ -1,5 +1,5 @@
 .page-header {
-  padding: 0.25rem 0 0.5rem;
+  padding: 0.35rem 0 0.75rem;
 }
 
 .page-header__content {
@@ -25,15 +25,16 @@
 }
 
 .page-header h1 {
-  margin: 0.35rem 0 0;
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
-  line-height: 1.15;
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
 }
 
 .subtitle {
   margin: 0.65rem 0 0;
   color: #475569;
-  max-width: 52rem;
+  max-width: 60rem;
   line-height: 1.6;
 }
 

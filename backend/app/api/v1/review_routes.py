@@ -102,11 +102,14 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.dependencies.services import get_review_service
+from app.models.feedback import Feedback
+from app.schemas.api_response import ApiResponse
 from app.schemas.feedback import (
     AnalysisResponse,
     FeedbackResponse,
     ReviewRequest,
 )
+from app.utils.responses import success_response
 
 # from app.services.feedback_service import FeedbackService
 from app.services.review_service import ReviewService
@@ -119,7 +122,7 @@ router = APIRouter(
 
 @router.post(
     "/analyze",
-    response_model=AnalysisResponse,
+    response_model=ApiResponse[AnalysisResponse],
     status_code=status.HTTP_200_OK,
 )
 def analyze_review(
@@ -131,13 +134,29 @@ def analyze_review(
     Analyze a customer review using AI LLM without saving it.
     """
 
-    # return feedback_service.analyze_review(request.text)
-    return review_service.analyze_review(request.text)
+    analysis = review_service.analyze_review(request.text)
+    analysis_response = analysis.model_dump(mode="json")
+
+    return success_response(
+        data=analysis_response,
+        message="Review analyzed successfully.",
+    )
+
+
+def _build_feedback_response(feedback: Feedback) -> dict[str, object]:
+    return FeedbackResponse.model_validate(feedback).model_dump(mode="json")
+
+
+def _build_feedback_history(history: list[Feedback]) -> list[dict[str, object]]:
+    return [
+        FeedbackResponse.model_validate(item).model_dump(mode="json")
+        for item in history
+    ]
 
 
 @router.post(
     "/analyze-and-save",
-    response_model=FeedbackResponse,
+    response_model=ApiResponse[FeedbackResponse],
     status_code=status.HTTP_201_CREATED,
 )
 def analyze_and_save(
@@ -149,15 +168,21 @@ def analyze_and_save(
     Analyze a customer review and save it to the database.
     """
 
-    return review_service.analyze_and_save(
+    feedback = review_service.analyze_and_save(
         db=db,
         review=request.text,
+    )
+    feedback_response = _build_feedback_response(feedback)
+
+    return success_response(
+        data=feedback_response,
+        message="Review saved successfully.",
     )
 
 
 @router.get(
     "/history",
-    response_model=list[FeedbackResponse],
+    response_model=ApiResponse[list[FeedbackResponse]],
     status_code=status.HTTP_200_OK,
 )
 def get_history(
@@ -168,12 +193,18 @@ def get_history(
     Return all previously analyzed customer reviews.
     """
 
-    return review_service.get_history(db)
+    history = review_service.get_history(db)
+    history_response = _build_feedback_history(history)
+
+    return success_response(
+        data=history_response,
+        message="Review history loaded successfully.",
+    )
 
 
 @router.get(
     "/{feedback_id}",
-    response_model=FeedbackResponse,
+    response_model=ApiResponse[FeedbackResponse],
     status_code=status.HTTP_200_OK,
 )
 def get_feedback(
@@ -193,29 +224,39 @@ def get_feedback(
     if feedback is None:
         raise FeedbackNotFoundException()
 
-    return feedback
+    feedback_response = _build_feedback_response(feedback)
 
-
-@router.delete(
-    "/{feedback_id}",
-    response_model=FeedbackResponse,
-    status_code=status.HTTP_200_OK,
-)
-def delete_feedback(
-    feedback_id: UUID,
-    db: Session = Depends(get_db),
-    review_service: ReviewService = Depends(get_review_service),
-):
-    """
-    Delete a feedback record.
-    """
-
-    feedback = review_service.delete_feedback(
-        db=db,
-        feedback_id=feedback_id,
+    return success_response(
+        data=feedback_response,
+        message="Feedback retrieved successfully.",
     )
 
-    if feedback is None:
-        raise FeedbackNotFoundException()
 
-    return feedback
+# @router.delete(
+#     "/{feedback_id}",
+#     response_model=ApiResponse[FeedbackResponse],
+#     status_code=status.HTTP_200_OK,
+# )
+# def delete_feedback(
+#     feedback_id: UUID,
+#     db: Session = Depends(get_db),
+#     review_service: ReviewService = Depends(get_review_service),
+# ):
+#     """
+#     Delete a feedback record.
+#     """
+
+#     feedback = review_service.delete_feedback(
+#         db=db,
+#         feedback_id=feedback_id,
+#     )
+
+#     if feedback is None:
+#         raise FeedbackNotFoundException()
+
+#     feedback_response = _build_feedback_response(feedback)
+
+#     return success_response(
+#         data=feedback_response,
+#         message="Feedback deleted successfully.",
+#     )

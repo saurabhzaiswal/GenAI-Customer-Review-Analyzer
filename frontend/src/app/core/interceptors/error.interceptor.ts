@@ -4,27 +4,22 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, throwError } from 'rxjs';
 
 function resolveErrorMessage(error: HttpErrorResponse): string {
-  const detail = error.error?.detail;
-
-  if (typeof detail === 'string' && detail.trim()) {
-    return detail;
+  if (error.status === 0) {
+    return 'Unable to reach the server. Please make sure the API is running, then try again.';
   }
 
-  if (Array.isArray(detail) && detail.length > 0) {
-    return detail
-      .map((item) => (typeof item?.msg === 'string' ? item.msg : JSON.stringify(item)))
-      .join(', ');
+  const message = error.error?.message ?? error.error?.detail;
+  if (typeof message === 'string' && message.trim()) {
+    return message;
   }
 
-  if (typeof error.error?.message === 'string' && error.error.message.trim()) {
-    return error.error.message;
-  }
+  if (error.status === 401) return 'Your session has expired. Please sign in again.';
+  if (error.status === 403) return 'You do not have permission to complete this action.';
+  if (error.status === 404) return 'We could not find the requested item.';
+  if (error.status === 422) return 'Please check the information you entered and try again.';
+  if (error.status >= 500) return 'The server could not complete your request. Please try again shortly.';
 
-  if (error.message) {
-    return error.message;
-  }
-
-  return 'An unexpected error occurred. Please try again.';
+  return 'We could not complete your request. Please try again.';
 }
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
@@ -33,13 +28,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       const message = resolveErrorMessage(error);
-
-      snackBar.open(message, 'Close', {
-        duration: 5000,
-        verticalPosition: 'top',
-        panelClass: ['app-snackbar-error'],
-      });
-
+      snackBar.open(message, 'Close', { duration: 5000, verticalPosition: 'top', panelClass: ['app-snackbar-error'] });
       return throwError(() => new Error(message));
     })
   );

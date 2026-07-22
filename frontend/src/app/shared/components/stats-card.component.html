@@ -1,6 +1,9 @@
-<mat-card class="stats-card" [class.stats-card--highlight]="highlight">
+<mat-card class="stats-card" [class.stats-card--highlight]="highlight" [class]="'stats-card stats-card--' + tone">
   <div class="stats-card__content">
-    <div class="stats-card__title">{{ title }}</div>
+    <div class="stats-card__topline">
+      <div class="stats-card__title">{{ title }}</div>
+      <span class="stats-card__icon" aria-hidden="true"><mat-icon>{{ icon }}</mat-icon></span>
+    </div>
     <div class="stats-card__value">{{ value }}</div>
     <div class="stats-card__description">{{ description }}</div>
   </div>
