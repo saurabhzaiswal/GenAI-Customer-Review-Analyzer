@@ -46,7 +46,7 @@ jobs:
         run: uv sync --frozen
 
       - name: Security audit
-        run: uv run pip-audit
+        run: uvx pip-audit
 
       # `uvx` runs ruff in an isolated, on-the-fly environment without
       # requiring it to be added to pyproject.toml first. Once you're
