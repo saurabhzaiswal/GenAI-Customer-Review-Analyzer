@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -57,7 +58,7 @@ class FeedbackCreate(BaseModel):
 # -----------------------------
 
 class FeedbackResponse(BaseModel):
-    id: str
+    id: UUID
     review: str
     label: str
     score: int
@@ -68,5 +69,6 @@ class FeedbackResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(
-        from_attributes=True
+        from_attributes=True,
+        json_encoders={UUID: str},
     )

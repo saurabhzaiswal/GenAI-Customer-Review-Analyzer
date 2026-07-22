@@ -8,62 +8,84 @@
   <mat-progress-bar *ngIf="loading()" mode="indeterminate"></mat-progress-bar>
 
   <section *ngIf="savedFeedback().length > 0; else noData">
-    <div class="dashboard-summary">
-      <app-stats-card
-        title="Total Reviews"
-        [value]="statistics.totalReviews.toString()"
-        description="Total saved reviews"
-      ></app-stats-card>
+    <div class="dashboard-overview">
+      <div class="dashboard-summary">
+        <app-stats-card
+          title="Total Reviews"
+          [value]="statistics.totalReviews.toString()"
+          description="Total saved reviews"
+        ></app-stats-card>
 
-      <app-stats-card
-        title="Positive"
-        [value]="statistics.positivePercent + '%'"
-        description="Positive sentiment share"
-      ></app-stats-card>
+        <app-stats-card
+          title="Positive"
+          [value]="statistics.positivePercent + '%'"
+          description="Positive sentiment share"
+        ></app-stats-card>
 
-      <app-stats-card
-        title="Neutral"
-        [value]="statistics.neutralPercent + '%'"
-        description="Neutral sentiment share"
-      ></app-stats-card>
+        <app-stats-card
+          title="Neutral"
+          [value]="statistics.neutralPercent + '%'"
+          description="Neutral sentiment share"
+        ></app-stats-card>
 
-      <app-stats-card
-        title="Negative"
-        [value]="statistics.negativePercent + '%'"
-        description="Negative sentiment share"
-      ></app-stats-card>
+        <app-stats-card
+          title="Negative"
+          [value]="statistics.negativePercent + '%'"
+          description="Negative sentiment share"
+        ></app-stats-card>
 
-      <app-stats-card
-        title="Average Score"
-        [value]="statistics.averageScore.toString()"
-        description="Average sentiment score"
-      ></app-stats-card>
+        <app-stats-card
+          title="Average Score"
+          [value]="statistics.averageScore.toString()"
+          description="Average sentiment score"
+        ></app-stats-card>
 
-      <app-stats-card
-        title="Avg Confidence"
-        value="{{ statistics.averageConfidence | percent:'1.0-0' }}"
-        description="Mean model confidence"
-      ></app-stats-card>
+        <app-stats-card
+          title="Avg Confidence"
+          value="{{ statistics.averageConfidence | percent:'1.0-0' }}"
+          description="Mean model confidence"
+        ></app-stats-card>
 
-      <app-stats-card
-        title="Top Theme"
-        [value]="statistics.topTheme"
-        description="Most mentioned theme"
-        [highlight]="true"
-      ></app-stats-card>
+        <app-stats-card
+          title="Top Theme"
+          [value]="statistics.topTheme"
+          description="Most mentioned theme"
+          [highlight]="true"
+        ></app-stats-card>
+      </div>
+
+      <mat-card class="themes-card">
+        <div class="themes-card__header">
+          <h3>Most common themes</h3>
+          <p>Spot recurring topics across customer feedback at a glance.</p>
+        </div>
+        <mat-chip-set aria-label="Most common themes">
+          <mat-chip *ngFor="let theme of statistics.topThemes">{{ theme[0] }} · {{ theme[1] }}</mat-chip>
+        </mat-chip-set>
+      </mat-card>
     </div>
-
-    <mat-card class="themes-card">
-      <h3>Most common themes</h3>
-      <mat-chip-set aria-label="Most common themes">
-        <mat-chip *ngFor="let theme of statistics.topThemes">
-          {{ theme[0] }} · {{ theme[1] }}
-        </mat-chip>
-      </mat-chip-set>
-    </mat-card>
 
     <section class="dashboard-charts">
       <app-analytics-charts [reviews]="savedFeedback()"></app-analytics-charts>
+    </section>
+
+    <section class="dashboard-history">
+      <mat-card class="dashboard-history-card">
+        <div class="dashboard-history__header">
+          <div>
+            <p class="eyebrow">Review history</p>
+            <h2>Saved customer feedback</h2>
+          </div>
+          <p class="dashboard-history__description">
+            Filter, examine, and remove saved review records directly from your analytics workspace.
+          </p>
+        </div>
+
+        <app-review-history
+          [savedReviews]="savedFeedback()"
+          (deleteFeedback)="onDeleteFeedback($event)"
+        ></app-review-history>
+      </mat-card>
     </section>
   </section>
 

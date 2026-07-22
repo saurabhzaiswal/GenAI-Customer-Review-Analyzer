@@ -1,5 +1,5 @@
 .review-card {
-  border-radius: 1.25rem;
+  border-radius: var(--radius);
   padding: 1.1rem;
   border: 1px solid #e2e8f0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -38,10 +38,20 @@
   padding: 0.85rem 1rem;
   border-left: 4px solid #2563eb;
   background: #f8fafc;
-  border-radius: 0 0.75rem 0.75rem 0;
+  border-radius: 0 0 var(--radius) 0;
   color: #334155;
   font-style: italic;
   line-height: 1.55;
+}
+
+.review-card__field {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius);
+  background: #f8fafc;
 }
 
 .review-card__content {
@@ -56,20 +66,26 @@
   }
 }
 
-.review-card__field {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
-  padding: 0.65rem 0.75rem;
-  border-radius: 0.75rem;
-  background: #f8fafc;
-}
-
 .review-card__field--wide {
   grid-column: 1 / -1;
   flex-direction: column;
   align-items: flex-start;
+}
+
+@media (max-width: 640px) {
+  .review-card__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .review-card__content {
+    grid-template-columns: 1fr;
+  }
+
+  .review-card__field {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .review-card__field span {

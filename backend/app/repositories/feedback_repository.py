@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -47,7 +49,7 @@ class FeedbackRepository:
     def get_by_id(
         self,
         db: Session,
-        feedback_id: str,
+        feedback_id: UUID | str,
     ) -> Feedback | None:
 
         return db.get(
