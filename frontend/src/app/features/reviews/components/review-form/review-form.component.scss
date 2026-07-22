@@ -1,0 +1,78 @@
+.review-form {
+  display: grid;
+  gap: 1.25rem;
+  background: var(--surface);
+  color: var(--text-color);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.07);
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.form-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.form-header__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+
+  mat-icon { margin-top: 0.15rem; padding: 0.45rem; width: 2.25rem; height: 2.25rem; border-radius: 10px; background: #dbeafe; color: #1d4ed8; }
+}
+
+.review-count {
+  align-self: center;
+  border-radius: var(--radius);
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 0.75rem;
+}
+
+.form-header h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+}
+
+.form-header p {
+  margin: 0.35rem 0 0;
+  color: #475569;
+  max-width: 42rem;
+  line-height: 1.5;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.actions button {
+  min-width: 10.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+textarea[matInput] { min-height: 15rem; line-height: 1.6; resize: vertical; }
+
+@media (max-width: 639px) {
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}

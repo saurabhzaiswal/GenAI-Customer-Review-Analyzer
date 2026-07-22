@@ -1,0 +1,15 @@
+.page-shell { display: grid; gap: 1.5rem; width: 100%; }
+.page-progress { border-radius: var(--radius); }
+.page-grid { display: grid; }
+.saved-history-section { border: 1px solid rgba(148, 163, 184, 0.18); border-radius: var(--radius); background: rgba(255, 255, 255, 0.94); box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06); }
+.page-panel { display: grid; gap: 1.25rem; }
+.summary-panel, .analysis-panel { display: grid; gap: 1rem; margin-top: 0; padding: clamp(0.85rem, 2vw, 1.15rem); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-muted); color: var(--text-color); }
+.summary-panel__header, .analysis-panel__header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.summary-panel__header h2, .analysis-panel__header h2 { margin: 0; font-size: 1.15rem; letter-spacing: -0.015em; }
+.summary-panel__header span, .analysis-panel__header span { color: var(--text-muted); font-size: 0.9rem; }
+.summary-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.result-list { display: grid; gap: 1rem; }
+.status-panel { display: flex; align-items: flex-start; gap: 0.65rem; margin-top: 1rem; padding: 0.85rem 1rem; border: 1px solid color-mix(in srgb, var(--warning-color) 35%, var(--border)); border-radius: var(--radius); background: color-mix(in srgb, var(--warning-color) 12%, var(--surface)); color: var(--text-color); }.status-panel mat-icon { color: var(--warning-color); }.status-panel p { margin: 0; }
+.saved-history-section { padding: clamp(1rem, 2.5vw, 1.5rem); }
+.saved-history-section__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }.saved-history-section__header .eyebrow { margin: 0; color: var(--primary-color); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }.saved-history-section__header h2 { margin: 0.3rem 0 0; color: var(--text-color); font-size: clamp(1.35rem, 2.5vw, 1.7rem); letter-spacing: -0.025em; }.saved-history-section__header p:last-child { max-width: 42rem; margin: 0.55rem 0 0; color: var(--text-muted); line-height: 1.55; }.saved-history-section__count { padding: 0.5rem 0.7rem; border-radius: var(--radius); background: var(--primary-color-soft); color: var(--primary-color); font-size: 0.82rem; font-weight: 800; white-space: nowrap; }
+@media (max-width: 639px) { .summary-panel__header button { width: 100%; }.saved-history-section__header { flex-direction: column; }.saved-history-section__count { align-self: flex-start; } }

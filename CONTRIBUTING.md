@@ -57,7 +57,7 @@ The AI layer follows the Factory + Dependency Inversion pattern:
 2. Register it in `app/services/ai/factory.py`'s `AIProviderFactory.create()`.
 3. Set `AI_PROVIDER=<your_provider>` in `.env`.
 
-`ClaudeProvider` currently exists as a stub (raises `NotImplementedError`) - implementing it is a good first contribution.
+`ClaudeProvider` uses Anthropic's Messages API through the existing `requests` dependency. Keep its response validation and `AIProviderException` mapping consistent with the other providers.
 
 ## Frontend setup
 
@@ -75,6 +75,10 @@ Runs at `http://localhost:4200` and expects the backend at the URL configured in
 - No component talks to `HttpClient` directly; go through `ApiService` → a feature-specific `*ApiService` → the feature's own service (see `ReviewApiService` / `ReviewService` for the pattern).
 - New features live under `src/app/features/<feature-name>/` with `pages/`, `components/`, `services/`, and `models/` subfolders.
 - Shared, feature-agnostic UI goes in `src/app/shared/components/`.
+- Keep each component's TypeScript, template, styles, and tests in its own named folder.
+- Use the theme tokens in `src/styles.scss`; derive brand shades with `color-mix()` instead of introducing duplicate hard-coded blues.
+- Keep border radii at or below the global `--radius: 12px` token. This includes Angular Material overlay surfaces such as dialogs and menus.
+- Table filters must reset pagination to the first page; conditionally rendered paginator/sort instances should be connected with `ViewChild` setters.
 
 ## Code style
 

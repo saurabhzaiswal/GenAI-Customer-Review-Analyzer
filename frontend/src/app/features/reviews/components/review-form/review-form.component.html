@@ -1,0 +1,30 @@
+<section class="review-form">
+  <div class="form-header">
+    <div class="form-header__title-row">
+      <mat-icon aria-hidden="true">rate_review</mat-icon>
+      <div>
+        <h2>{{ 'reviews.formTitle' | translate }}</h2>
+        <p>{{ 'reviews.formHelp' | translate }}</p>
+      </div>
+    </div>
+    <span class="review-count" *ngIf="reviewLineCount > 0">{{ reviewLineCount }} {{ (reviewLineCount === 1 ? 'reviews.reviewReady' : 'reviews.reviewsReady') | translate }}</span>
+  </div>
+
+  <form [formGroup]="form" class="review-form__form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'reviews.reviewsLabel' | translate }}</mat-label>
+      <textarea matInput formControlName="reviews" rows="10" [placeholder]="'reviews.placeholder' | translate" [attr.aria-label]="'reviews.reviewsLabel' | translate" appAutofocus></textarea>
+      <mat-hint align="end">{{ 'reviews.hint' | translate }}</mat-hint>
+      <mat-error *ngIf="reviewsControl?.hasError('required')">{{ 'reviews.required' | translate }}</mat-error>
+      <mat-error *ngIf="reviewsControl?.hasError('lineTooShort')">{{ 'reviews.short' | translate }}</mat-error>
+      <mat-error *ngIf="reviewsControl?.hasError('lineTooLong')">{{ 'reviews.long' | translate }}</mat-error>
+    </mat-form-field>
+
+    <div class="actions">
+      <input #fileInput hidden type="file" accept=".csv,.xlsx" (change)="importReviews($event)" />
+      <button mat-stroked-button type="button" (click)="fileInput.click()" [disabled]="isSubmitting"><mat-icon>upload_file</mat-icon>{{ 'reviews.import' | translate }}</button>
+      <button mat-flat-button color="primary" type="button" (click)="submitReview()" [disabled]="isSubmitting || form.invalid"><mat-icon aria-hidden="true">analytics</mat-icon>{{ (isSubmitting ? 'reviews.analyzing' : 'reviews.analyze') | translate }}</button>
+      <button mat-stroked-button color="primary" type="button" (click)="submitReviewAndSave()" [disabled]="isSubmitting || form.invalid"><mat-icon aria-hidden="true">save</mat-icon>{{ (isSubmitting ? 'reviews.saving' : 'reviews.save') | translate }}</button>
+    </div>
+  </form>
+</section>

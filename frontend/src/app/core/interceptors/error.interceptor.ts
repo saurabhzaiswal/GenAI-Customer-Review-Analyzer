@@ -2,10 +2,11 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, throwError } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 
-function resolveErrorMessage(error: HttpErrorResponse): string {
+function resolveErrorMessage(error: HttpErrorResponse, translate: TranslateService): string {
   if (error.status === 0) {
-    return 'Unable to reach the server. Please make sure the API is running, then try again.';
+    return translate.instant('errors.network');
   }
 
   const message = error.error?.message ?? error.error?.detail;
@@ -13,22 +14,23 @@ function resolveErrorMessage(error: HttpErrorResponse): string {
     return message;
   }
 
-  if (error.status === 401) return 'Your session has expired. Please sign in again.';
-  if (error.status === 403) return 'You do not have permission to complete this action.';
-  if (error.status === 404) return 'We could not find the requested item.';
-  if (error.status === 422) return 'Please check the information you entered and try again.';
-  if (error.status >= 500) return 'The server could not complete your request. Please try again shortly.';
+  if (error.status === 401) return translate.instant('errors.unauthorized');
+  if (error.status === 403) return translate.instant('errors.forbidden');
+  if (error.status === 404) return translate.instant('errors.notFound');
+  if (error.status === 422) return translate.instant('errors.validation');
+  if (error.status >= 500) return translate.instant('errors.server');
 
-  return 'We could not complete your request. Please try again.';
+  return translate.instant('errors.generic');
 }
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const snackBar = inject(MatSnackBar);
+  const translate = inject(TranslateService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      const message = resolveErrorMessage(error);
-      snackBar.open(message, 'Close', { duration: 5000, verticalPosition: 'top', panelClass: ['app-snackbar-error'] });
+      const message = resolveErrorMessage(error, translate);
+      snackBar.open(message, translate.instant('common.close'), { duration: 5000, verticalPosition: 'top', panelClass: ['app-snackbar-error'] });
       return throwError(() => new Error(message));
     })
   );

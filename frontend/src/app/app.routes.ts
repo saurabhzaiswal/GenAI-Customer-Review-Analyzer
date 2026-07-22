@@ -9,11 +9,11 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        loadComponent: () => import('./features/reviews/pages/review-page.component').then((m) => m.ReviewPageComponent),
+        loadComponent: () => import('./features/reviews/pages/review-page/review-page.component').then((m) => m.ReviewPageComponent),
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/pages/dashboard-page.component').then((m) => m.DashboardPageComponent),
+        loadComponent: () => import('./features/dashboard/pages/dashboard-page/dashboard-page.component').then((m) => m.DashboardPageComponent),
       },
       {
         path: '**',

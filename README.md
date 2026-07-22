@@ -22,7 +22,7 @@
 
 The **GenAI Customer Review Analyzer** helps businesses make sense of customer feedback at scale. Users submit reviews through an Angular dashboard, and the backend analyzes each one with an LLM - determining sentiment, a numeric score, the main theme discussed, an AI-generated improvement suggestion, and a confidence score - then persists the result in PostgreSQL for later browsing and analytics.
 
-The project codebase: **FastAPI + SQLAlchemy 2.0 + Alembic + PostgreSQL** on the backend, with UUIDv7 primary keys, a swappable multi-provider AI layer (Gemini today, OpenAI implemented, Claude stubbed in), and an **Angular 21** standalone-component frontend on top. See `docs/ARCHITECTURE.md` and `CHANGELOG.md` for the full evolution and a from-the-code review of what's solid vs. still rough.
+The project codebase: **FastAPI + SQLAlchemy 2.0 + Alembic + PostgreSQL** on the backend, with UUIDv7 primary keys, a swappable Gemini/OpenAI/Claude provider layer, and an **Angular 21** standalone-component frontend.
 
 ---
 
@@ -35,7 +35,7 @@ Businesses receive customer feedback from many sources at once - Google Reviews,
 ##  Features
 
 ###  AI-Powered Analysis
-- Multi-provider AI layer behind a single interface (`AIProvider`), selected at runtime via `AI_PROVIDER` - **Gemini** and **OpenAI** are implemented; **Claude** exists as a stub (see `docs/ARCHITECTURE.md`)
+- Multi-provider AI layer behind a single interface (`AIProvider`), selected via `AI_PROVIDER`; Gemini, OpenAI, and Claude Messages API providers are implemented
 - Strict structured-JSON prompting (no markdown, no free text)
 - Sentiment classification: positive / neutral / negative
 - Sentiment score, 1–5
@@ -52,11 +52,23 @@ Businesses receive customer feedback from many sources at once - Google Reviews,
 - Review page: batch input (one review per line), "Analyze" vs. "Analyze & Save"
 - Searchable / filterable (sentiment + theme) / sortable / paginated history table (Angular Material Table)
 - Confirm-dialog before deleting a saved review
-- Dashboard: stats cards (total reviews, average score/confidence, sentiment %, top theme) computed client-side, plus Chart.js sentiment pie chart, theme bar chart, and score-trend line chart
+- Review history with working keyword/sentiment/theme/score filters, sortable columns, and 5/10/20-row pagination
+- Compact three-dot row action menu with a full review-details dialog and destructive-action confirmation
+- Responsive history presentation: sortable Material table on desktop and paginated review cards on mobile
+- Mobile navigation uses a left-to-right drawer with flat links, an inline language selector, theme control, and dismissible backdrop
+- CSV/Excel bulk review import and filtered Excel/PDF report export (libraries lazy-loaded on demand)
+- Runtime ngx-translate i18n for English, Hindi, Japanese, Dutch, Korean, French, German, and Spanish
+- Persistent light/dark theme preference and language preference
+- Fixed, full-width top loading indicator backed by a concurrency-safe request counter
+- Dashboard: client-side summary stats plus Chart.js sentiment, theme, and trend charts with theme-aware, touch-friendly tooltips and concise value formatting
+
+The Reviews and Dashboard pages share the same dark navy-to-blue customer-intelligence hero treatment. Brand colors are centralized as `--primary-color`, `--secondary-color`, semantic tokens, and `color-mix()` derivatives. The `--radius` token is capped at `12px` and applied to application and Angular Material surfaces.
+
+SEO metadata in `index.html` includes descriptive title/description/keywords, robots directives, Open Graph and Twitter metadata, PWA metadata, and `WebApplication` JSON-LD structured data.
 
 ### Backend (FastAPI)
 - Clean, layered architecture: **Route → Service → AI Provider / Repository**, each with a single responsibility
-- Dependency injection via `Depends()` with `lru_cache`-backed singletons
+- Dependency injection via `Depends()`: the AI client and SQLAlchemy engine/pool are shared, while each database request receives its own short-lived `Session`
 - Pydantic v2 request/response validation, decoupled from the SQLAlchemy models
 - **PostgreSQL** persistence via **SQLAlchemy 2.0**, migrated with **Alembic**
 - **UUIDv7** primary keys (via `uuid6`) for time-sortable, index-friendly IDs
@@ -100,7 +112,7 @@ ReviewService (sanitize → orchestrate)
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | Angular 21, TypeScript 5.9, Angular Material 21 + CDK, Tailwind CSS 4, RxJS 7.8, Chart.js 4.5, ngx-toastr, dayjs, Vitest |
+| **Frontend** | Angular 21, TypeScript 5.9, Angular Material 21 + CDK, Tailwind CSS 4, RxJS 7.8, Chart.js 4.5, ngx-translate 18, ExcelJS, jsPDF, Vitest |
 | **Backend** | FastAPI, Python 3.14+, Pydantic v2, SQLAlchemy 2.0, Alembic, `uuid6`, `bleach`, Uvicorn, python-dotenv |
 | **AI** | Google Gemini (`google-genai` SDK), OpenAI (Responses API), structured JSON output, prompt engineering |
 | **Database** | PostgreSQL (via `psycopg` v3 driver) |
@@ -117,8 +129,8 @@ GenAI-Customer-Review-Analyzer/
 │   └── src/app/
 │       ├── core/            # api.service.ts, interceptors, config, models
 │       ├── features/
-│       │   ├── reviews/     # pages, components, models, services
-│       │   └── dashboard/   # pages, components (Chart.js analytics)
+│       │   ├── reviews/     # component-per-folder UI, pages, models, services
+│       │   └── dashboard/   # responsive page + tree-shaken Chart.js analytics
 │       ├── layouts/         # navbar, footer, main-layout
 │       └── shared/          # components, pipes, enums, directives, types
 │
@@ -183,9 +195,13 @@ DEBUG=true
 
 DATABASE_URL=postgresql+psycopg://review_user:password123@localhost:5432/genai_review_analyzer
 
-AI_PROVIDER=gemini                 # gemini | openai | claude (claude not implemented yet)
+AI_PROVIDER=gemini                 # gemini | openai | claude
 AI_API_KEY=your_api_key_here
 AI_MODEL=gemini-2.5-flash
+
+# Optional Claude-specific overrides when AI_PROVIDER=claude
+ANTHROPIC_API_KEY=your_anthropic_key
+CLAUDE_MODEL=claude-opus-4-8
 ```
 
 ---
@@ -213,6 +229,14 @@ ng serve
 ```
 Runs on `http://localhost:4200`.
 
+## Production latency (Vercel + Render + Neon)
+
+The reported browser timings show slow first requests (about 17–32 seconds) followed by a warm history request around 500 ms. That pattern is consistent with cold starts: a sleeping Render service must start its Python process, and suspended Neon compute may also need to wake and establish a database connection. `analyze` also waits on the external AI model, so even a warm AI request is not guaranteed to finish in under one second.
+
+The backend now enables `pool_pre_ping` and a five-minute `pool_recycle` so stale Neon connections are checked before use. This prevents dead pooled connections from causing avoidable failures, but it cannot remove hosting-provider wake-up time or model inference latency. For predictable latency, use an always-on Render instance and a Neon configuration that does not suspend.
+
+The SQLAlchemy `Engine` is created once and acts as the shared, thread-safe pool (the equivalent of Go's `*sql.DB`). A `Session` is stateful and request-scoped; sharing it across concurrent requests can leak transactions and ORM state. Routes now depend on services rather than raw sessions, and `/reviews/analyze` has no database dependency.
+
 ---
 
 ##  Error Handling & Robustness
@@ -234,7 +258,7 @@ While writing this documentation, I went through the real backend code end-to-en
 
 A few more things worth your attention (not changed, since they involve deletions or dependency/config choices that are yours to make - full detail in `docs/ARCHITECTURE.md` §9 and `CHANGELOG.md`):
 
-- `services/ai/openai_provider.py` imports `openai`, but the package isn't in `backend/pyproject.toml` yet - run `uv add openai` before setting `AI_PROVIDER=openai`.
+- The OpenAI and Anthropic providers use their official SDKs. Keep provider-specific keys in environment variables and never commit them.
 - `services/gemini_service.py` and `services/feedback_service.py` are unused, superseded duplicates of `services/ai/gemini_provider.py` and `services/review_service.py` - safe to delete.
 - `api/v1/review_routes.py` still has a large commented-out first draft above the live code - cleanup candidate.
 - `app/core/exceptions.py` defines an unused `register_exception_handlers()` - the handlers actually wired into `main.py` live in `app/exceptions/handlers.py` instead. Worth consolidating.
@@ -265,7 +289,6 @@ This project demonstrates hands-on experience with:
 - Docker & Docker Compose (Angular + FastAPI + PostgreSQL + Redis)
 - Real-time streaming responses via WebSockets
 - Finish the `ClaudeProvider` implementation
-- Multi-language support, dark mode
 - Cloud deployment (AWS / Azure / GCP)
 
 ---

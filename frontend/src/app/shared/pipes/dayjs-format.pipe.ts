@@ -1,18 +1,23 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import dayjs from 'dayjs';
+import { inject, Pipe, PipeTransform } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 
 @Pipe({
   name: 'dayjsFormat',
   standalone: true,
+  pure: false,
 })
 export class DayjsFormatPipe implements PipeTransform {
-  transform(value: string | Date | null | undefined, format = 'MMM D, YYYY h:mm A'): string {
+  private readonly translate = inject(TranslateService);
+  transform(value: string | Date | null | undefined): string {
     if (!value) {
       return '-';
     }
 
-    const parsed = dayjs(value);
+    const parsed = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '-';
 
-    return parsed.isValid() ? parsed.format(format) : '-';
+    return new Intl.DateTimeFormat(this.translate.currentLang() || 'en', {
+      year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+    }).format(parsed);
   }
 }

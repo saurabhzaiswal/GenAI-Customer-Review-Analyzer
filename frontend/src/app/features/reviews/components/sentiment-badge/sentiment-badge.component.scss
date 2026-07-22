@@ -1,0 +1,23 @@
+:host {
+  display: inline-flex;
+}
+
+.sentiment-chip {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.sentiment-chip--positive {
+  --mdc-chip-elevated-container-color: #dcfce7;
+  --mdc-chip-label-text-color: #166534;
+}
+
+.sentiment-chip--neutral {
+  --mdc-chip-elevated-container-color: #e2e8f0;
+  --mdc-chip-label-text-color: var(--text-color);
+}
+
+.sentiment-chip--negative {
+  --mdc-chip-elevated-container-color: #fee2e2;
+  --mdc-chip-label-text-color: #991b1b;
+}

@@ -5,15 +5,21 @@
       <span class="brand__text">GenAI Customer Review Analyzer</span>
     </a>
 
-    <nav class="nav-links" aria-label="Primary navigation">
+    <nav class="nav-links" [attr.aria-label]="'nav.primary' | translate">
       <a mat-button routerLink="/" routerLinkActive="nav-active" [routerLinkActiveOptions]="{ exact: true }">
         <mat-icon aria-hidden="true">rate_review</mat-icon>
-        Reviews
+        {{ 'nav.reviews' | translate }}
       </a>
       <a mat-button routerLink="/dashboard" routerLinkActive="nav-active">
         <mat-icon aria-hidden="true">insights</mat-icon>
-        Dashboard
+        {{ 'nav.dashboard' | translate }}
       </a>
+      <button mat-icon-button type="button" [matMenuTriggerFor]="languageMenu" [attr.aria-label]="'nav.language' | translate">
+        <mat-icon>language</mat-icon>
+      </button>
+      <button mat-icon-button type="button" (click)="preferences.toggleDarkMode()" [attr.aria-label]="'nav.theme' | translate">
+        <mat-icon>{{ preferences.darkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
       <a
         mat-stroked-button
         class="github-link"
@@ -26,23 +32,37 @@
       </a>
     </nav>
 
-    <button mat-icon-button class="mobile-menu-toggle" [matMenuTriggerFor]="mobileMenu" aria-label="Open navigation menu">
-      <mat-icon>menu</mat-icon>
-    </button>
-
-    <mat-menu #mobileMenu="matMenu">
-      <button mat-menu-item routerLink="/" routerLinkActive="nav-active" [routerLinkActiveOptions]="{ exact: true }">
-        <mat-icon>rate_review</mat-icon>
-        Reviews
+    <mat-menu #languageMenu="matMenu">
+      <button mat-menu-item *ngFor="let language of preferences.languages" (click)="preferences.setLanguage(language.code)">
+        <mat-icon>{{ preferences.language() === language.code ? 'check' : 'translate' }}</mat-icon>
+        <span>{{ language.nativeLabel }}</span>
       </button>
-      <button mat-menu-item routerLink="/dashboard" routerLinkActive="nav-active">
-        <mat-icon>insights</mat-icon>
-        Dashboard
-      </button>
-      <a mat-menu-item href="https://github.com/saurabhzaiswal" target="_blank" rel="noopener noreferrer">
-        <mat-icon>code</mat-icon>
-        GitHub
-      </a>
     </mat-menu>
+
+    <button mat-icon-button class="mobile-menu-toggle" type="button" (click)="toggleMobileNav()" [attr.aria-expanded]="mobileNavOpen()" aria-controls="mobile-navigation" [attr.aria-label]="'nav.open' | translate">
+      <mat-icon>{{ mobileNavOpen() ? 'close' : 'menu' }}</mat-icon>
+    </button>
   </div>
 </mat-toolbar>
+
+<button *ngIf="mobileNavOpen()" class="mobile-nav-backdrop" type="button" (click)="closeMobileNav()" [attr.aria-label]="'nav.close' | translate"></button>
+<aside id="mobile-navigation" class="mobile-drawer" [class.mobile-drawer--open]="mobileNavOpen()" [attr.aria-hidden]="!mobileNavOpen()">
+  <div class="mobile-drawer__header">
+    <span>{{ 'nav.menu' | translate }}</span>
+    <button mat-icon-button type="button" (click)="closeMobileNav()" [attr.aria-label]="'nav.close' | translate"><mat-icon>close</mat-icon></button>
+  </div>
+  <nav class="mobile-drawer__links" [attr.aria-label]="'nav.primary' | translate">
+    <a routerLink="/" routerLinkActive="mobile-link--active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileNav()"><mat-icon>rate_review</mat-icon>{{ 'nav.reviews' | translate }}</a>
+    <a routerLink="/dashboard" routerLinkActive="mobile-link--active" (click)="closeMobileNav()"><mat-icon>insights</mat-icon>{{ 'nav.dashboard' | translate }}</a>
+    <a href="https://github.com/saurabhzaiswal" target="_blank" rel="noopener noreferrer"><mat-icon>code</mat-icon>GitHub</a>
+  </nav>
+  <section class="mobile-drawer__section" [attr.aria-label]="'nav.language' | translate">
+    <h2><mat-icon>language</mat-icon>{{ 'nav.language' | translate }}</h2>
+    <div class="language-grid">
+      <button *ngFor="let language of preferences.languages" type="button" (click)="preferences.setLanguage(language.code)" [class.language-option--active]="preferences.language() === language.code">
+        <mat-icon>{{ preferences.language() === language.code ? 'check' : 'translate' }}</mat-icon>{{ language.nativeLabel }}
+      </button>
+    </div>
+  </section>
+  <button class="theme-option" type="button" (click)="preferences.toggleDarkMode()"><mat-icon>{{ preferences.darkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>{{ 'nav.theme' | translate }}</button>
+</aside>
