@@ -8,8 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AutofocusDirective } from '../../../../shared/directives/autofocus.directive';
-import { countReviewLines, reviewLinesValidator } from '../../../../shared/validators/review-lines.validator';
+import { AutofocusDirective } from '@app/shared/directives/autofocus.directive';
+import { countReviewLines, reviewLinesValidator } from '@app/shared/validators/review-lines.validator';
 
 @Component({
   standalone: true,

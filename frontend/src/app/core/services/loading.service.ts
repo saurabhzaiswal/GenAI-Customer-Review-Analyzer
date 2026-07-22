@@ -3,15 +3,17 @@ import { Injectable, signal } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class LoadingService {
   readonly loading = signal(false);
-  private activeRequests = 0;
+  private readonly activeRequests = new Set<symbol>();
 
-  start(): void {
-    this.activeRequests += 1;
+  start(): symbol {
+    const requestToken = Symbol('http-request');
+    this.activeRequests.add(requestToken);
     this.loading.set(true);
+    return requestToken;
   }
 
-  stop(): void {
-    this.activeRequests = Math.max(0, this.activeRequests - 1);
-    this.loading.set(this.activeRequests > 0);
+  stop(requestToken: symbol): void {
+    this.activeRequests.delete(requestToken);
+    this.loading.set(this.activeRequests.size > 0);
   }
 }

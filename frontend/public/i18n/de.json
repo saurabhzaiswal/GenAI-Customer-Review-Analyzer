@@ -88,6 +88,7 @@
     "excelExported": "Excel-Bericht exportiert.",
     "pdfExported": "PDF-Bericht exportiert."
   },
+  "report": { "subtitle": "Analysebericht zum Kundenfeedback", "generated": "Erstellt", "atAGlance": "Feedback auf einen Blick", "reviewDetails": "Bewertungsdetails", "recommendedAction": "Empfohlene Maßnahme", "fontLoadError": "Die PDF-Sprachschrift konnte nicht geladen werden. Bitte erneut versuchen." },
   "dashboard": {
     "eyebrow": "Kundenintelligenz",
     "title": "Feedback wird handlungsfähig.",

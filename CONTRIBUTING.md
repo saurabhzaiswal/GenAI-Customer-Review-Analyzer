@@ -57,7 +57,7 @@ The AI layer follows the Factory + Dependency Inversion pattern:
 2. Register it in `app/services/ai/factory.py`'s `AIProviderFactory.create()`.
 3. Set `AI_PROVIDER=<your_provider>` in `.env`.
 
-`ClaudeProvider` uses Anthropic's Messages API through the existing `requests` dependency. Keep its response validation and `AIProviderException` mapping consistent with the other providers.
+`ClaudeProvider` uses Anthropic's official SDK and structured Messages API parsing. Keep its response validation and `AIProviderException` mapping consistent with the other providers.
 
 ## Frontend setup
 
@@ -76,17 +76,30 @@ Runs at `http://localhost:4200` and expects the backend at the URL configured in
 - New features live under `src/app/features/<feature-name>/` with `pages/`, `components/`, `services/`, and `models/` subfolders.
 - Shared, feature-agnostic UI goes in `src/app/shared/components/`.
 - Keep each component's TypeScript, template, styles, and tests in its own named folder.
+- Use `@app/*` for cross-feature/application imports and `@env/*` for environment imports. Do not introduce parent-traversal imports such as `../../../shared/...`; keep `./` only for colocated files.
 - Use the theme tokens in `src/styles.scss`; derive brand shades with `color-mix()` instead of introducing duplicate hard-coded blues.
 - Keep border radii at or below the global `--radius: 12px` token. This includes Angular Material overlay surfaces such as dialogs and menus.
 - Table filters must reset pagination to the first page; conditionally rendered paginator/sort instances should be connected with `ViewChild` setters.
 
 ## Code style
 
-There's no linting/formatting pipeline wired up yet (no Ruff/Black config on the backend, no ESLint config beyond Angular CLI defaults on the frontend). If you're contributing:
+The CI workflow runs Ruff checks/format verification for Python and the Angular test/build pipeline. If you're contributing:
 
 - Match the existing formatting style you see in the file you're editing.
 - Keep functions single-purpose - the whole backend is organized around the Single Responsibility Principle (see `docs/ARCHITECTURE.md`), and PRs that blur route/service/AI/repository boundaries will likely get a change request.
-- Setting up Ruff + Black + Pytest (backend) and a proper CI pipeline is tracked as a planned enhancement - see `CHANGELOG.md` / README roadmap. Contributions on that front are very welcome.
+- Pull requests must pass the repository CI workflow: backend dependency audit, Ruff lint/format, compilation/tests, frontend tests/build, and the PostgreSQL migration check. Install the locked development tools with `uv sync --all-groups`.
+
+## Protecting `master`
+
+After the CI workflow has completed successfully at least once, open **Settings → Rules → Rulesets → New branch ruleset** in GitHub. Target the default branch (`master`), set enforcement to **Active**, and enable:
+
+- Require a pull request before merging.
+- Require status checks to pass before merging; add the unique **CI required** check and require the branch to be up to date.
+- Require conversation resolution before merging.
+- Block force pushes and branch deletion.
+- Do not add a bypass actor if CI must apply to administrators as well.
+
+One approving review is recommended for team repositories. For a solo repository, CI protection still works without requiring another reviewer. The workflow also listens for `merge_group`, so it is compatible with GitHub's merge queue if that feature is enabled later.
 
 ## Submitting changes
 

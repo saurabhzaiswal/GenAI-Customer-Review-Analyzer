@@ -5,15 +5,20 @@ name: CI
 # - On every pull request targeting master (catches problems BEFORE merge)
 on:
   push:
-    branches: ["**"]
+    branches: [master]
   pull_request:
     branches: [master]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 # If you push new commits to a PR while a previous run is still going,
 # cancel the stale one instead of wasting minutes on outdated code. 
 # Cancel old workflow if new commits arrive
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -23,6 +28,7 @@ jobs:
   backend:
     name: Backend (lint + test)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: backend
@@ -43,20 +49,20 @@ jobs:
         run: uv python install
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-groups
 
       - name: Security audit
-        run: uvx pip-audit
+        run: uv run pip-audit
 
-      # `uvx` runs ruff in an isolated, on-the-fly environment without, uv run pip-audit
-      # requiring it to be added to pyproject.toml first. Once you're
-      # ready to pin a version, run `uv add --dev ruff` locally and
-      # switch this to `uv run ruff check .` instead.
+      # CI tools are pinned in the dev dependency group and uv.lock.
       - name: Lint (ruff check)
-        run: uvx ruff check .
+        run: uv run ruff check .
 
       - name: Format check (ruff format)
-        run: uvx ruff format --check .
+        run: uv run ruff format --check .
+
+      - name: Compile backend
+        run: uv run python -m compileall -q app
 
       # This project doesn't have a tests/ directory yet, so this step
       # skips itself rather than failing CI on "no tests collected."
@@ -72,11 +78,12 @@ jobs:
           fi
 
   # ============================================================
-  # JOB 2 - Frontend Angular build
+  # JOB 2 - Frontend Angular tests + production build
   # ============================================================
   frontend:
     name: Frontend (Angular build)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
@@ -95,6 +102,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run unit tests
+        run: npm test -- --watch=false
+
       # This is the single highest-value check for the frontend: if the
       # Angular app doesn't compile, nothing downstream matters.
       - name: Build (production configuration)
@@ -111,6 +121,7 @@ jobs:
   migration-check:
     name: Alembic migration check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: backend
@@ -152,7 +163,26 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-groups
 
       - name: Run migrations against throwaway Postgres
         run: uv run alembic upgrade head
+
+  # Require this single, stable check in the master branch ruleset. It only
+  # succeeds when every backend, frontend, and migration job succeeded.
+  required-check:
+    name: CI required
+    if: always()
+    needs: [backend, frontend, migration-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Verify all CI jobs succeeded
+        env:
+          BACKEND_RESULT: ${{ needs.backend.result }}
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+          MIGRATION_RESULT: ${{ needs.migration-check.result }}
+        run: |
+          test "$BACKEND_RESULT" = "success"
+          test "$FRONTEND_RESULT" = "success"
+          test "$MIGRATION_RESULT" = "success"

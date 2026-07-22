@@ -88,6 +88,7 @@
     "excelExported": "Excel रिपोर्ट निर्यात हो गई।",
     "pdfExported": "PDF रिपोर्ट निर्यात हो गई।"
   },
+  "report": { "subtitle": "ग्राहक प्रतिक्रिया विश्लेषण रिपोर्ट", "generated": "बनाया गया", "atAGlance": "प्रतिक्रिया एक नज़र में", "reviewDetails": "समीक्षा विवरण", "recommendedAction": "सुझाई गई कार्रवाई", "fontLoadError": "PDF भाषा फ़ॉन्ट लोड नहीं हो सका। कृपया पुनः प्रयास करें।" },
   "dashboard": {
     "eyebrow": "ग्राहक इंटेलिजेंस",
     "title": "प्रतिक्रिया को उपयोगी बनाएँ।",

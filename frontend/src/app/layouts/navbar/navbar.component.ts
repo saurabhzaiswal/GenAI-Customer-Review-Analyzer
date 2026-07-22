@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { TranslatePipe } from '@ngx-translate/core';
-import { UiPreferencesService } from '../../core/services/ui-preferences.service';
+import { UiPreferencesService } from '@app/core/services/ui-preferences.service';
 
 @Component({
   standalone: true,

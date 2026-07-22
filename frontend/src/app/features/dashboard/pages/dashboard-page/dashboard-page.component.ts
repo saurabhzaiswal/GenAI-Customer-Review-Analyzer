@@ -1,9 +1,9 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReviewService } from '../../../reviews/services/review.service';
-import { AnalyticsChartsComponent } from '../../components/analytics-charts/analytics-charts.component';
-import { ReviewHistoryComponent } from '../../../reviews/components/review-history/review-history.component';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ReviewService } from '@app/features/reviews/services/review.service';
+import { AnalyticsChartsComponent } from '@app/features/dashboard/components/analytics-charts/analytics-charts.component';
+import { ReviewHistoryComponent } from '@app/features/reviews/components/review-history/review-history.component';
+import { EmptyStateComponent } from '@app/shared/components/empty-state/empty-state.component';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 

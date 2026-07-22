@@ -13,14 +13,15 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { TruncatePipe } from '../../../../shared/pipes/truncate.pipe';
-import { DayjsFormatPipe } from '../../../../shared/pipes/dayjs-format.pipe';
-import { SentimentBadgeComponent } from '../sentiment-badge/sentiment-badge.component';
-import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
-import { Feedback } from '../../models/feedback';
-import { SentimentLabel } from '../../../../shared/types';
-import { ReviewDetailsDialogComponent } from '../review-details-dialog/review-details-dialog.component';
+import type { jsPDF as JsPdfDocument } from 'jspdf';
+import { TruncatePipe } from '@app/shared/pipes/truncate.pipe';
+import { DayjsFormatPipe } from '@app/shared/pipes/dayjs-format.pipe';
+import { SentimentBadgeComponent } from '@app/features/reviews/components/sentiment-badge/sentiment-badge.component';
+import { ConfirmDialogComponent } from '@app/shared/components/confirm-dialog/confirm-dialog.component';
+import { EmptyStateComponent } from '@app/shared/components/empty-state/empty-state.component';
+import { Feedback } from '@app/features/reviews/models/feedback';
+import { SentimentLabel } from '@app/shared/types';
+import { ReviewDetailsDialogComponent } from '@app/features/reviews/components/review-details-dialog/review-details-dialog.component';
 
 interface ReviewFilter {
   search: string;
@@ -172,6 +173,14 @@ export class ReviewHistoryComponent implements OnChanges {
     const document = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
     const reviews = this.dataSource.filteredData;
     const logo = await this.loadLogoDataUrl();
+    const locale = this.translate.currentLang() || 'en';
+    let fontFamily = 'helvetica';
+    try {
+      fontFamily = await this.loadPdfFont(document, locale);
+    } catch {
+      this.snackBar.open(this.translate.instant('report.fontLoadError'), this.translate.instant('common.close'), { duration: 5000 });
+      return;
+    }
     const colors = {
       navy: [30, 64, 175] as [number, number, number], blue: [37, 99, 235] as [number, number, number],
       cyan: [14, 165, 233] as [number, number, number], ink: [15, 23, 42] as [number, number, number],
@@ -185,80 +194,81 @@ export class ReviewHistoryComponent implements OnChanges {
     reviews.forEach((review) => {
       sentiment[review.label] += 1;
       totalScore += review.score;
-      themes.set(review.theme || 'Unknown', (themes.get(review.theme || 'Unknown') ?? 0) + 1);
+      themes.set(review.theme || '—', (themes.get(review.theme || '—') ?? 0) + 1);
     });
     const topThemes = [...themes.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const generated = new Intl.DateTimeFormat(this.translate.currentLang() || 'en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
+    const t = (key: string): string => this.translate.instant(key);
+    const generated = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
 
     const header = (subtitle: string): number => {
       document.setFillColor(...colors.navy); document.rect(0, 0, 210, 42, 'F');
       document.setFillColor(...colors.blue); document.triangle(96, 0, 210, 0, 210, 42, 'F');
       document.setFillColor(...colors.cyan); document.triangle(166, 0, 210, 0, 210, 42, 'F');
       if (logo) document.addImage(logo, 'PNG', 14, 9, 22, 22);
-      document.setTextColor(...colors.white); document.setFont('helvetica', 'bold'); document.setFontSize(18);
+      document.setTextColor(...colors.white); document.setFont(fontFamily, 'bold'); document.setFontSize(18);
       document.text('GenAI Customer Review Analyzer', 42, 17);
-      document.setFont('helvetica', 'normal'); document.setFontSize(9); document.text(subtitle, 42, 25);
-      document.setFontSize(8); document.text(`Generated ${generated}`, 42, 31);
+      document.setFont(fontFamily, 'normal'); document.setFontSize(9); document.text(subtitle, 42, 25);
+      document.setFontSize(8); document.text(`${t('report.generated')} ${generated}`, 42, 31);
       return 52;
     };
     const metric = (x: number, y: number, width: number, label: string, value: string): void => {
       document.setFillColor(...colors.soft); document.setDrawColor(...colors.line); document.roundedRect(x, y, width, 24, 3, 3, 'FD');
-      document.setTextColor(...colors.muted); document.setFont('helvetica', 'bold'); document.setFontSize(7); document.text(label.toUpperCase(), x + 5, y + 7);
+      document.setTextColor(...colors.muted); document.setFont(fontFamily, 'bold'); document.setFontSize(7); document.text(label.toUpperCase(), x + 5, y + 7);
       document.setTextColor(...colors.ink); document.setFontSize(16); document.text(value, x + 5, y + 18);
     };
     const sectionTitle = (title: string, y: number): number => {
-      document.setTextColor(...colors.blue); document.setFont('helvetica', 'bold'); document.setFontSize(8); document.text('CUSTOMER INTELLIGENCE', 14, y);
+      document.setTextColor(...colors.blue); document.setFont(fontFamily, 'bold'); document.setFontSize(8); document.text(t('dashboard.eyebrow').toUpperCase(), 14, y);
       document.setTextColor(...colors.ink); document.setFontSize(15); document.text(title, 14, y + 8);
       return y + 15;
     };
 
-    let y = header('Customer feedback intelligence report');
-    metric(14, y, 42, 'Reviews analyzed', String(reviews.length));
-    metric(60, y, 42, 'Average score', reviews.length ? `${(totalScore / reviews.length).toFixed(1)}/5` : '0/5');
-    metric(106, y, 42, 'Positive', `${reviews.length ? Math.round((sentiment.positive / reviews.length) * 100) : 0}%`);
-    metric(152, y, 44, 'Top theme', topThemes[0]?.[0] ?? 'N/A');
-    y = sectionTitle('Feedback at a glance', y + 36);
+    let y = header(t('report.subtitle'));
+    metric(14, y, 42, t('dashboard.reviewsAnalyzed'), String(reviews.length));
+    metric(60, y, 42, t('dashboard.averageScore'), reviews.length ? `${(totalScore / reviews.length).toFixed(1)}/5` : '0/5');
+    metric(106, y, 42, t('history.positive'), `${reviews.length ? Math.round((sentiment.positive / reviews.length) * 100) : 0}%`);
+    metric(152, y, 44, t('reviews.topTheme'), topThemes[0]?.[0] ?? '—');
+    y = sectionTitle(t('report.atAGlance'), y + 36);
     const sentimentRows: Array<[string, number, [number, number, number]]> = [
-      ['Positive', sentiment.positive, colors.green], ['Neutral', sentiment.neutral, colors.amber], ['Negative', sentiment.negative, colors.red],
+      [t('history.positive'), sentiment.positive, colors.green], [t('history.neutral'), sentiment.neutral, colors.amber], [t('history.negative'), sentiment.negative, colors.red],
     ];
     sentimentRows.forEach(([label, count, color], index) => {
       const rowY = y + index * 10; const ratio = reviews.length ? count / reviews.length : 0;
-      document.setTextColor(...colors.ink); document.setFontSize(9); document.setFont('helvetica', 'bold'); document.text(label, 14, rowY + 4);
+      document.setTextColor(...colors.ink); document.setFontSize(9); document.setFont(fontFamily, 'bold'); document.text(label, 14, rowY + 4);
       document.setFillColor(...colors.line); document.roundedRect(42, rowY, 112, 5, 2.5, 2.5, 'F');
       if (ratio) { document.setFillColor(...color); document.roundedRect(42, rowY, Math.max(3, 112 * ratio), 5, 2.5, 2.5, 'F'); }
-      document.setTextColor(...colors.muted); document.setFont('helvetica', 'normal'); document.text(`${count} (${Math.round(ratio * 100)}%)`, 160, rowY + 4);
+      document.setTextColor(...colors.muted); document.setFont(fontFamily, 'normal'); document.text(`${count} (${Math.round(ratio * 100)}%)`, 160, rowY + 4);
     });
-    y = sectionTitle('Most discussed themes', y + 40);
+    y = sectionTitle(t('dashboard.talkAbout'), y + 40);
     topThemes.forEach(([theme, count], index) => {
       document.setDrawColor(...colors.line); document.line(14, y + 7, 196, y + 7);
-      document.setTextColor(...colors.blue); document.setFont('helvetica', 'bold'); document.setFontSize(9); document.text(String(index + 1).padStart(2, '0'), 14, y + 4);
+      document.setTextColor(...colors.blue); document.setFont(fontFamily, 'bold'); document.setFontSize(9); document.text(String(index + 1).padStart(2, '0'), 14, y + 4);
       document.setTextColor(...colors.ink); document.text(theme, 27, y + 4);
-      document.setTextColor(...colors.muted); document.setFont('helvetica', 'normal'); document.text(`${count} ${count === 1 ? 'mention' : 'mentions'}`, 196, y + 4, { align: 'right' });
+      document.setTextColor(...colors.muted); document.setFont(fontFamily, 'normal'); document.text(`${count} ${t(count === 1 ? 'dashboard.mention' : 'dashboard.mentions')}`, 196, y + 4, { align: 'right' });
       y += 10;
     });
 
-    document.addPage(); y = header(`${reviews.length} saved customer ${reviews.length === 1 ? 'review' : 'reviews'}`);
-    y = sectionTitle('Review details', y);
+    document.addPage(); y = header(`${reviews.length} ${t(reviews.length === 1 ? 'charts.review' : 'charts.reviews')}`);
+    y = sectionTitle(t('report.reviewDetails'), y);
     reviews.forEach((item, index) => {
       const reviewLines = document.splitTextToSize(item.review, 166) as string[];
-      const suggestionLines = document.splitTextToSize(item.suggestion || 'No suggestion provided.', 160) as string[];
+      const suggestionLines = document.splitTextToSize(item.suggestion || t('reviews.noSuggestion'), 160) as string[];
       const chunks = Array.from({ length: Math.max(1, Math.ceil(reviewLines.length / 38)) }, (_, chunkIndex) => reviewLines.slice(chunkIndex * 38, (chunkIndex + 1) * 38));
       chunks.forEach((chunk, chunkIndex) => {
         const isLastChunk = chunkIndex === chunks.length - 1;
         const cardHeight = Math.max(32, 22 + chunk.length * 4.2 + (isLastChunk ? 8 + suggestionLines.length * 4.2 : 0));
-        if (y + cardHeight > 278) { document.addPage(); y = header('Review details continued'); }
+        if (y + cardHeight > 278) { document.addPage(); y = header(t('report.reviewDetails')); }
         document.setFillColor(255, 255, 255); document.setDrawColor(...colors.line); document.roundedRect(14, y, 182, cardHeight, 3, 3, 'FD');
         const badgeColor = item.label === 'positive' ? colors.green : item.label === 'negative' ? colors.red : colors.amber;
         document.setFillColor(...badgeColor); document.roundedRect(20, y + 6, 30, 7, 3, 3, 'F');
-        document.setTextColor(...colors.white); document.setFont('helvetica', 'bold'); document.setFontSize(7); document.text(item.label.toUpperCase(), 35, y + 10.7, { align: 'center' });
-        document.setTextColor(...colors.muted); document.setFont('helvetica', 'normal');
-        const continuation = chunkIndex ? `  |  continued ${chunkIndex + 1}/${chunks.length}` : '';
-        document.text(`#${index + 1}  |  ${item.theme || 'Unknown'}  |  ${item.score}/5  |  ${Math.round((item.confidence ?? 0) * 100)}% confidence${continuation}`, 55, y + 10.7);
+        document.setTextColor(...colors.white); document.setFont(fontFamily, 'bold'); document.setFontSize(7); document.text(t(`history.${item.label}`).toUpperCase(), 35, y + 10.7, { align: 'center' });
+        document.setTextColor(...colors.muted); document.setFont(fontFamily, 'normal');
+        const continuation = chunkIndex ? `  |  ${chunkIndex + 1}/${chunks.length}` : '';
+        document.text(`#${index + 1}  |  ${item.theme || '—'}  |  ${item.score}/5  |  ${Math.round((item.confidence ?? 0) * 100)}% ${t('history.confidence')}${continuation}`, 55, y + 10.7);
         document.setTextColor(...colors.ink); document.setFontSize(9); document.text(chunk, 20, y + 21);
         if (isLastChunk) {
           const suggestionY = y + 23 + chunk.length * 4.2;
-          document.setTextColor(...colors.blue); document.setFont('helvetica', 'bold'); document.setFontSize(7); document.text('RECOMMENDED ACTION', 20, suggestionY);
-          document.setTextColor(...colors.muted); document.setFont('helvetica', 'normal'); document.setFontSize(8); document.text(suggestionLines, 20, suggestionY + 5);
+          document.setTextColor(...colors.blue); document.setFont(fontFamily, 'bold'); document.setFontSize(7); document.text(t('report.recommendedAction').toUpperCase(), 20, suggestionY);
+          document.setTextColor(...colors.muted); document.setFont(fontFamily, 'normal'); document.setFontSize(8); document.text(suggestionLines, 20, suggestionY + 5);
         }
         y += cardHeight + 6;
       });
@@ -267,10 +277,32 @@ export class ReviewHistoryComponent implements OnChanges {
     for (let page = 1; page <= pages; page += 1) {
       document.setPage(page); document.setDrawColor(...colors.line); document.line(14, 287, 196, 287);
       document.setTextColor(...colors.muted); document.setFontSize(7); document.text('GenAI Customer Review Analyzer', 14, 292);
-      document.text(`Page ${page} of ${pages}`, 196, 292, { align: 'right' });
+      document.text(`${page} / ${pages}`, 196, 292, { align: 'right' });
     }
     document.save(`customer-review-report-${new Date().toISOString().slice(0, 10)}.pdf`);
     this.snackBar.open(this.translate.instant('history.pdfExported'), this.translate.instant('common.close'), { duration: 3000 });
+  }
+
+  private async loadPdfFont(document: JsPdfDocument, locale: string): Promise<string> {
+    const fonts: Partial<Record<string, { file: string; family: string }>> = {
+      hi: { file: 'NotoSansDevanagari.ttf', family: 'NotoSansDevanagari' },
+      ja: { file: 'NotoSansJP.ttf', family: 'NotoSansJP' },
+      ko: { file: 'NotoSansKR.ttf', family: 'NotoSansKR' },
+    };
+    const font = fonts[locale];
+    if (!font) return 'helvetica';
+
+    const response = await fetch(`/fonts/${font.file}`);
+    if (!response.ok) throw new Error(`Unable to load PDF font: ${font.file}`);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    let binary = '';
+    for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+    }
+    document.addFileToVFS(font.file, btoa(binary));
+    document.addFont(font.file, font.family, 'normal');
+    document.addFont(font.file, font.family, 'bold');
+    return font.family;
   }
 
   private async loadLogoDataUrl(): Promise<string | null> {

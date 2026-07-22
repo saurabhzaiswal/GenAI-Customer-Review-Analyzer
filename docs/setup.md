@@ -138,7 +138,7 @@ AI_API_KEY=sk-your_openai_key
 AI_MODEL=gpt-4o-mini
 ```
 
-Get a key at the [OpenAI Platform](https://platform.openai.com/api-keys). You'll also need `pip install openai` / add `openai` to `pyproject.toml` if it isn't already there in your working copy, since it isn't in the base `dependencies` list.
+Get a key at the [OpenAI Platform](https://platform.openai.com/api-keys). The official OpenAI SDK is already locked in the backend dependencies.
 
 ### 4.3 Claude / Anthropic
 
@@ -346,7 +346,7 @@ Cursor is a VS Code fork, so almost everything in Section 8 applies unchanged:
 | CORS error in the browser console | `APP_URL` in `.env` doesn't match the Angular origin | Set `APP_URL=http://localhost:4200` (or your Codespace/Coder forwarded URL) |
 | `The AI analysis service is temporarily unavailable` | Bad key, quota/rate limit, provider outage, or network failure | Check Render logs, the API key, quota, and model; retry transient failures |
 | First production request takes 15–30+ seconds | Render and/or Neon woke from idle; AI inference adds latency | Use always-on hosting; compare cold and warm timings for `/health`, `/history`, and `/analyze` |
-| `Unsupported AI Provider: ...` | Typo in `AI_PROVIDER`, or picked `claude` before implementing it | Use exactly `gemini`, `openai`, or `claude`; implement `ClaudeProvider` first if choosing Claude |
+| `Unsupported AI Provider: ...` | Typo in `AI_PROVIDER` | Use exactly `gemini`, `openai`, or `claude` |
 | Angular can't reach the API | `apiBaseUrl` in `environment.development.ts` points somewhere wrong, or backend isn't running | Confirm backend is up on 8000 and the environment file matches |
 | Alembic says table already exists / out of sync | Migrations run out of order or DB was created manually | `uv run alembic current` to check state, or drop and recreate the dev DB |
 

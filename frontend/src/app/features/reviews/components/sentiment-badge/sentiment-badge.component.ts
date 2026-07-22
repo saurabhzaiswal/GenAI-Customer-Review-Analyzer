@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
-import { SentimentLabel } from '../../../../shared/types';
+import { SentimentLabel } from '@app/shared/types';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({

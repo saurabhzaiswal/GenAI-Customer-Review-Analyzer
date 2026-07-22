@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { API_BASE_URL } from '../config/api.config';
-import { ApiResponse } from '../models/api-response';
+import { API_BASE_URL } from '@app/core/config/api.config';
+import { ApiResponse } from '@app/core/models/api-response';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {

@@ -3,9 +3,9 @@ import { Component, Inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { DayjsFormatPipe } from '../../../../shared/pipes/dayjs-format.pipe';
-import { Feedback } from '../../models/feedback';
-import { SentimentBadgeComponent } from '../sentiment-badge/sentiment-badge.component';
+import { DayjsFormatPipe } from '@app/shared/pipes/dayjs-format.pipe';
+import { Feedback } from '@app/features/reviews/models/feedback';
+import { SentimentBadgeComponent } from '@app/features/reviews/components/sentiment-badge/sentiment-badge.component';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({

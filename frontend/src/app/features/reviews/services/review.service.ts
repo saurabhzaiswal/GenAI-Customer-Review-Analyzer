@@ -1,12 +1,15 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
-import { ReviewApiService } from '../../../core/services/review-api.service';
-import { AnalysisResponse, ReviewBatchSummary } from '../models/analysis-response';
-import { Feedback } from '../models/feedback';
-import { ReviewRequest } from '../models/review-request';
+import { ReviewApiService } from '@app/core/services/review-api.service';
+import { AnalysisResponse, ReviewBatchSummary } from '@app/features/reviews/models/analysis-response';
+import { Feedback } from '@app/features/reviews/models/feedback';
+import { ReviewRequest } from '@app/features/reviews/models/review-request';
 
 @Injectable({ providedIn: 'root' })
 export class ReviewService {
+  private static readonly batchConcurrency = 3;
+  private historyLoaded = false;
+  private historyRequest?: Promise<void>;
   readonly analysisResults = signal<AnalysisResponse[]>([]);
   readonly savedFeedback = signal<Feedback[]>([]);
   readonly loading = signal(false);
@@ -85,13 +88,26 @@ export class ReviewService {
     }
   }
 
-  async loadHistory(): Promise<void> {
+  async loadHistory(force = false): Promise<void> {
+    if (!force && this.historyLoaded) return;
+    if (this.historyRequest) return this.historyRequest;
+
+    this.historyRequest = this.fetchHistory();
+    try {
+      await this.historyRequest;
+    } finally {
+      this.historyRequest = undefined;
+    }
+  }
+
+  private async fetchHistory(): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
 
     try {
       const history = await lastValueFrom(this.reviewApiService.getHistory());
       this.savedFeedback.set(history);
+      this.historyLoaded = true;
     } catch (error) {
       this.error.set(this.parseError(error));
     } finally {
@@ -120,72 +136,92 @@ export class ReviewService {
   }
 
   private async processBatch(reviews: string[]): Promise<AnalysisResponse[]> {
-    const results: AnalysisResponse[] = [];
-
-    for (const review of reviews) {
+    return this.mapWithConcurrency(reviews, async (review) => {
       try {
         const request: ReviewRequest = { text: review };
         const response = await lastValueFrom(this.reviewApiService.analyzeReview(request));
 
-        results.push({
+        return {
           review,
           label: response.label,
           score: response.score,
           theme: response.theme,
           suggestion: response.suggestion,
           confidence: response.confidence,
-        });
+        };
       } catch {
-        results.push({
+        return {
           review,
-          label: 'neutral',
+          label: 'neutral' as const,
           score: 0,
           theme: 'Error',
           suggestion: 'This review could not be analyzed. Please try again.',
           confidence: 0,
           hasError: true,
-        });
+        };
       }
-    }
-
-    return results;
+    });
   }
 
   private async processBatchWithSave(reviews: string[]): Promise<{
     analysis: AnalysisResponse[];
     saved: Feedback[];
   }> {
-    const analysis: AnalysisResponse[] = [];
-    const saved: Feedback[] = [];
-
-    for (const review of reviews) {
+    const results = await this.mapWithConcurrency(reviews, async (review) => {
       try {
         const request: ReviewRequest = { text: review };
         const feedback = await lastValueFrom(this.reviewApiService.analyzeReviewAndSave(request));
 
-        saved.push(feedback);
-        analysis.push({
-          review: feedback.review,
-          label: feedback.label,
-          score: feedback.score,
-          theme: feedback.theme,
-          suggestion: feedback.suggestion,
-          confidence: feedback.confidence,
-        });
+        return {
+          feedback,
+          analysis: {
+            review: feedback.review,
+            label: feedback.label,
+            score: feedback.score,
+            theme: feedback.theme,
+            suggestion: feedback.suggestion,
+            confidence: feedback.confidence,
+          } satisfies AnalysisResponse,
+        };
       } catch {
-        analysis.push({
-          review,
-          label: 'neutral',
-          score: 0,
-          theme: 'Error',
-          suggestion: 'This review could not be saved. Please try again.',
-          confidence: 0,
-          hasError: true,
-        });
+        return {
+          analysis: {
+            review,
+            label: 'neutral' as const,
+            score: 0,
+            theme: 'Error',
+            suggestion: 'This review could not be saved. Please try again.',
+            confidence: 0,
+            hasError: true,
+          },
+        };
       }
-    }
+    });
 
-    return { analysis, saved };
+    return {
+      analysis: results.map(({ analysis }) => analysis),
+      saved: results.flatMap(({ feedback }) => feedback ? [feedback] : []),
+    };
+  }
+
+  private async mapWithConcurrency<T, R>(
+    items: readonly T[],
+    worker: (item: T) => Promise<R>,
+  ): Promise<R[]> {
+    const results = new Array<R>(items.length);
+    let nextIndex = 0;
+    const run = async (): Promise<void> => {
+      while (nextIndex < items.length) {
+        const index = nextIndex++;
+        results[index] = await worker(items[index]);
+      }
+    };
+    const workers = Array.from(
+      { length: Math.min(ReviewService.batchConcurrency, items.length) },
+      () => run(),
+    );
+    await Promise.all(workers);
+    return results;
   }
 
   private prepareReviewLines(reviewsText: string): string[] {

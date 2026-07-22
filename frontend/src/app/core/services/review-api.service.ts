@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../api/api.service';
-import { AnalysisResponse } from '../../features/reviews/models/analysis-response';
-import { Feedback } from '../../features/reviews/models/feedback';
-import { ReviewRequest } from '../../features/reviews/models/review-request';
+import { ApiService } from '@app/core/api/api.service';
+import { AnalysisResponse } from '@app/features/reviews/models/analysis-response';
+import { Feedback } from '@app/features/reviews/models/feedback';
+import { ReviewRequest } from '@app/features/reviews/models/review-request';
 
 @Injectable({ providedIn: 'root' })
 export class ReviewApiService {

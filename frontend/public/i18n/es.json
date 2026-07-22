@@ -88,6 +88,7 @@
     "excelExported": "Informe de Excel exportado.",
     "pdfExported": "Informe PDF exportado."
   },
+  "report": { "subtitle": "Informe de inteligencia de comentarios", "generated": "Generado", "atAGlance": "Comentarios de un vistazo", "reviewDetails": "Detalles de reseñas", "recommendedAction": "Acción recomendada", "fontLoadError": "No se pudo cargar la fuente del PDF. Inténtalo de nuevo." },
   "dashboard": {
     "eyebrow": "Inteligencia de clientes",
     "title": "Comentarios que generan acción.",

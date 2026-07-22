@@ -18,7 +18,7 @@ import {
   PointElement,
   Tooltip,
 } from 'chart.js';
-import { Feedback } from '../../../reviews/models/feedback';
+import { Feedback } from '@app/features/reviews/models/feedback';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 Chart.register(

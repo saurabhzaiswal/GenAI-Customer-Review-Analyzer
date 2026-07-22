@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gen-ai-customer-review-analyzer.vercel.app/sitemap.xml

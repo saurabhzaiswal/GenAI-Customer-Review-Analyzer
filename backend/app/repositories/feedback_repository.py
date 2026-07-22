@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.feedback import Feedback
@@ -64,4 +64,5 @@ class FeedbackRepository:
     def count(
         self,
     ) -> int:
-        return len(self.get_all())
+        statement = select(func.count()).select_from(Feedback)
+        return self.db.scalar(statement) or 0
