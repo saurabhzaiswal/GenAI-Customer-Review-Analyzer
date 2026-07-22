@@ -9,7 +9,6 @@ def register_cors(app: FastAPI) -> None:
         allow_origins=[
             # "http://localhost:4200",
             settings.APP_URL
-            
         ],
         allow_credentials=True,
         allow_methods=["*"],

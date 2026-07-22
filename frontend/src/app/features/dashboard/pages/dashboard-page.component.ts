@@ -4,6 +4,7 @@ import { ReviewService } from '../../reviews/services/review.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header.component';
 import { StatsCardComponent } from '../../../shared/components/stats-card.component';
 import { AnalyticsChartsComponent } from '../components/analytics-charts.component';
+import { ReviewHistoryComponent } from '../../reviews/components/review-history.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -19,6 +20,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     PageHeaderComponent,
     StatsCardComponent,
     AnalyticsChartsComponent,
+    ReviewHistoryComponent,
     EmptyStateComponent,
     MatCardModule,
     MatChipsModule,
@@ -33,6 +35,10 @@ export class DashboardPageComponent implements OnInit {
 
   ngOnInit(): void {
     void this.reviewService.loadHistory();
+  }
+
+  protected async onDeleteFeedback(feedbackId: string): Promise<void> {
+    await this.reviewService.deleteFeedback(feedbackId);
   }
 
   protected get statistics() {

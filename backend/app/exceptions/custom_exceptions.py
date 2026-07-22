@@ -1,14 +1,13 @@
 from fastapi import status
 
-class AppException(Exception):
 
+class AppException(Exception):
     def __init__(self, message: str, status_code: int):
         self.message = message
         self.status_code = status_code
 
 
 class FeedbackNotFoundException(AppException):
-
     def __init__(self):
         super().__init__(
             message="Feedback not found.",
@@ -17,7 +16,6 @@ class FeedbackNotFoundException(AppException):
 
 
 class AIProviderException(AppException):
-
     def __init__(self, message: str):
         super().__init__(
             message=message,
@@ -26,7 +24,6 @@ class AIProviderException(AppException):
 
 
 class DatabaseException(AppException):
-
     def __init__(self, message: str):
         super().__init__(
             message=message,
@@ -35,15 +32,14 @@ class DatabaseException(AppException):
 
 
 class ValidationException(AppException):
-
     def __init__(self, message: str):
         super().__init__(
             message=message,
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-class EmptyReviewException(AppException):
 
+class EmptyReviewException(AppException):
     def __init__(self):
 
         super().__init__(

@@ -7,7 +7,6 @@ from app.services.ai.claude_provider import ClaudeProvider
 
 
 class AIProviderFactory:
-
     @staticmethod
     def create() -> AIProvider:
 
@@ -22,6 +21,4 @@ class AIProviderFactory:
         if provider == "claude":
             return ClaudeProvider()
 
-        raise ValueError(
-            f"Unsupported AI Provider: {provider}"
-        )
+        raise ValueError(f"Unsupported AI Provider: {provider}")

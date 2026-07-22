@@ -36,7 +36,7 @@
 
 .review-count {
   align-self: center;
-  border-radius: 9999px;
+  border-radius: var(--radius);
   background: #dbeafe;
   color: #1d4ed8;
   font-size: 0.85rem;

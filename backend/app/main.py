@@ -18,7 +18,6 @@ from app.exceptions.handlers import (
 )
 
 
-
 load_dotenv()
 
 app = FastAPI(

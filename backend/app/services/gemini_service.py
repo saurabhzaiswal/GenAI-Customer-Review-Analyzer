@@ -65,9 +65,6 @@ class GeminiService:
                 return response.parsed
         except Exception as e:
             raise RuntimeError(f"Error occurred while communicating with Gemini: {e}")
-        
-
-       
 
 
 # gemini_service = GeminiService()

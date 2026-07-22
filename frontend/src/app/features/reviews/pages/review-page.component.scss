@@ -5,7 +5,7 @@
 }
 
 .page-progress {
-  border-radius: 9999px;
+  border-radius: var(--radius);
 }
 
 .page-grid {
@@ -16,7 +16,7 @@
 .page-panel,
 .page-sidebar {
   background: #ffffff;
-  border-radius: 1.5rem;
+  border-radius: var(--radius);
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
   padding: clamp(1rem, 2vw, 1.5rem);
   border: 1px solid rgba(148, 163, 184, 0.25);
@@ -81,7 +81,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.65rem;
-  border-radius: 1rem;
+  border-radius: var(--radius);
   background: #fef3c7;
   color: #92400e;
   padding: 0.85rem 1rem;

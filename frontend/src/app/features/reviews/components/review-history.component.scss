@@ -27,13 +27,34 @@
 
 .history-table-wrapper {
   overflow-x: auto;
-  border-radius: 1rem;
+  border-radius: var(--radius);
   border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
 }
 
 .history-table {
   width: 100%;
-  min-width: 760px;
+  min-width: 100%;
+}
+
+.mat-mdc-table {
+  width: 100%;
+}
+
+@media (max-width: 820px) {
+  .history-table-wrapper {
+    padding-bottom: 0.25rem;
+  }
+
+  .history-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
+    padding: 0.75rem 0.65rem;
+  }
 }
 
 .mat-mdc-header-cell,

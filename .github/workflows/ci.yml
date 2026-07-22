@@ -1,0 +1,158 @@
+name: CI
+
+# When this workflow runs:
+# - On every push to master (catches anything that slips past review)
+# - On every pull request targeting master (catches problems BEFORE merge)
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [master]
+
+# If you push new commits to a PR while a previous run is still going,
+# cancel the stale one instead of wasting minutes on outdated code. 
+# Cancel old workflow if new commits arrive
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================
+  # JOB 1 - Backend lint + tests
+  # ============================================================
+  backend:
+    name: Backend (lint + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      # Astral's official action installs uv and caches its download +
+      # dependency cache between runs, so CI doesn't re-download everything
+      # from scratch every single time.
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install Python (matching pyproject.toml)
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Security audit
+        run: uvx pip-audit
+
+      # `uvx` runs ruff in an isolated, on-the-fly environment without, uv run pip-audit
+      # requiring it to be added to pyproject.toml first. Once you're
+      # ready to pin a version, run `uv add --dev ruff` locally and
+      # switch this to `uv run ruff check .` instead.
+      - name: Lint (ruff check)
+        run: uvx ruff check .
+
+      - name: Format check (ruff format)
+        run: uvx ruff format --check .
+
+      # This project doesn't have a tests/ directory yet, so this step
+      # skips itself rather than failing CI on "no tests collected."
+      # The moment you add backend/tests/, this starts actually running
+      # and protecting you - no workflow changes needed.
+      - name: Run tests (pytest)
+        run: |
+          if [ -d "tests" ]; then
+           
+            uv run pytest --maxfail=1 -q
+          else
+            echo "No tests/ directory yet - skipping. Add backend/tests/ to enable this check."
+          fi
+
+  # ============================================================
+  # JOB 2 - Frontend Angular build
+  # ============================================================
+  frontend:
+    name: Frontend (Angular build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"  
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # This is the single highest-value check for the frontend: if the
+      # Angular app doesn't compile, nothing downstream matters.
+      - name: Build (production configuration)
+        run: npm run build -- --configuration production
+
+  # ============================================================
+  # JOB 3 - Migration check
+  # Spins up a throwaway Postgres service container (GitHub-hosted,
+  # destroyed at the end of the run - nothing persists, no Docker
+  # image of yours involved) and runs your actual Alembic migrations
+  # against it. Catches a broken migration file BEFORE it ever
+  # reaches your real database.
+  # ============================================================
+  migration-check:
+    name: Alembic migration check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ci_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/ci_test_db
+      # Dummy values - migrations don't call the LLM, but Settings requires
+      # these fields to be present or the app fails to even import.
+      APP_NAME: CI
+      APP_VERSION: 0.0.0
+      APP_URL: http://localhost:4200
+      DEBUG: "true"
+      AI_PROVIDER: gemini
+      AI_API_KEY: ci-placeholder
+      AI_MODEL: gemini-3.5-flash
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run migrations against throwaway Postgres
+        run: uv run alembic upgrade head

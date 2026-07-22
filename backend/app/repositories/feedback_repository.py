@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -6,7 +8,7 @@ from app.schemas.feedback import FeedbackCreate
 
 
 class FeedbackRepository:
-#   def __init__(self):
+    #   def __init__(self):
     def create(
         self,
         db: Session,
@@ -29,32 +31,30 @@ class FeedbackRepository:
         db.refresh(db_feedback)
 
         return db_feedback
-    
-# Get all feedbacks from the table, ordered by creation date (most recent first)
+
+    # Get all feedbacks from the table, ordered by creation date (most recent first)
     def get_all(
         self,
         db: Session,
     ) -> list[Feedback]:
 
-        statement = (
-            select(Feedback)
-            .order_by(Feedback.created_at.desc())
-        )
+        statement = select(Feedback).order_by(Feedback.created_at.desc())
 
         return list(db.scalars(statement).all())
 
-# Get feedbacks by id 
+    # Get feedbacks by id
     def get_by_id(
         self,
         db: Session,
-        feedback_id: str,
+        feedback_id: UUID | str,
     ) -> Feedback | None:
 
         return db.get(
             Feedback,
             feedback_id,
         )
-# Delete feedback by id
+
+    # Delete feedback by id
     def delete(
         self,
         db: Session,
@@ -64,7 +64,8 @@ class FeedbackRepository:
         db.delete(feedback)
 
         db.commit()
-# Count the number of feedbacks in the table
+
+    # Count the number of feedbacks in the table
     def count(
         self,
         db: Session,
