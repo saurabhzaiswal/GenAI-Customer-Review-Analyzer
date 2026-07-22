@@ -113,12 +113,12 @@ This is the part of the project that actually makes it a **GenAI** app rather th
 - `provider.py` - an abstract `AIProvider` base class with one method: `analyze_review(review: str) -> AnalysisResponse`
 - `gemini_provider.py` - talks to **Google Gemini** (fully implemented)
 - `openai_provider.py` - talks to **OpenAI** via the Responses API (fully implemented)
-- `claude_provider.py` - a provider for **Anthropic's Claude models** (currently a stub that raises `NotImplementedError` - see note below)
+- `claude_provider.py` - calls Anthropic's Messages API and validates the returned JSON against `AnalysisResponse`
 - `factory.py` - `AIProviderFactory.create()` reads `AI_PROVIDER` from `.env` and hands the `ReviewService` whichever concrete provider you asked for
 
 So **`AI_PROVIDER` is literally "which LLM answers this request."** Swapping the model your app uses is a one-line `.env` change - no code changes, no redeploy of a different branch.
 
-> **Note on naming:** "Claude" here means **Anthropic's Claude model family** (e.g. `claude-sonnet-4-6`) used as an analysis LLM, called through the `anthropic` Python SDK - not to be confused with **Claude Code**, Anthropic's separate coding-agent CLI/IDE tool. They're unrelated products; only the model-as-LLM-provider is relevant to this app.
+> **Note on naming:** "Claude" here means **Anthropic's Claude model family** (the default is `claude-opus-4-8`) used as an analysis LLM through the `anthropic` Python SDK—not **Claude Code**, Anthropic's separate coding-agent tool.
 
 ### 4.1 Gemini (implemented, default)
 
@@ -140,15 +140,15 @@ AI_MODEL=gpt-4o-mini
 
 Get a key at the [OpenAI Platform](https://platform.openai.com/api-keys). You'll also need `pip install openai` / add `openai` to `pyproject.toml` if it isn't already there in your working copy, since it isn't in the base `dependencies` list.
 
-### 4.3 Claude / Anthropic (stub - needs implementation)
+### 4.3 Claude / Anthropic
 
 ```env
 AI_PROVIDER=claude
 AI_API_KEY=your_anthropic_key
-AI_MODEL=claude-sonnet-4-6
+AI_MODEL=claude-opus-4-8
 ```
 
-Right now `ClaudeProvider.analyze_review()` just raises `NotImplementedError`. To make this option functional, implement it the same way `gemini_provider.py` / `openai_provider.py` are built: call the Anthropic Messages API with the same rules-based prompt, force JSON-only output, and parse the result into an `AnalysisResponse`. Add `anthropic` to `backend/pyproject.toml` first (`uv add anthropic`).
+Run `uv sync` after pulling dependencies. The provider uses Anthropic's official Python SDK and `messages.parse(..., output_format=AnalysisResponse)` for schema-constrained Pydantic output. If `ANTHROPIC_API_KEY` is omitted, the provider falls back to the shared `AI_API_KEY` value.
 
 ---
 
@@ -332,7 +332,7 @@ Cursor is a VS Code fork, so almost everything in Section 8 applies unchanged:
 1. `File → Open Folder` on the repo root.
 2. Install the same extensions (Python, Angular Language Service) - Cursor supports the standard VS Code marketplace.
 3. Select the `backend/.venv` interpreter the same way as Section 8.
-4. Cursor's AI chat/agent can read this file plus `docs/ARCHITECTURE.md` for context if you ask it to explain or extend the codebase - point it at `app/services/ai/` first if you want it to help implement the `ClaudeProvider` stub from Section 4.3.
+4. Cursor's AI chat/agent can read this file plus `docs/ARCHITECTURE.md` for context when extending the provider or frontend architecture.
 5. Run the same two-terminal workflow (`uv run uvicorn app.main:app --reload` / `ng serve`) in Cursor's integrated terminal.
 
 ---
@@ -344,7 +344,8 @@ Cursor is a VS Code fork, so almost everything in Section 8 applies unchanged:
 | `uv: command not found` | `uv` not installed or not on `PATH` | Re-run the installer in Section 1, restart the terminal |
 | `psycopg.OperationalError: connection refused` | Postgres isn't running, or `DATABASE_URL` is wrong | Start Postgres; confirm host/port/user/password/db name match |
 | CORS error in the browser console | `APP_URL` in `.env` doesn't match the Angular origin | Set `APP_URL=http://localhost:4200` (or your Codespace/Coder forwarded URL) |
-| `RuntimeError: Gemini returned invalid JSON` | Bad/missing `AI_API_KEY`, or wrong `AI_MODEL` name | Double-check the key and that the model string is valid for that provider |
+| `The AI analysis service is temporarily unavailable` | Bad key, quota/rate limit, provider outage, or network failure | Check Render logs, the API key, quota, and model; retry transient failures |
+| First production request takes 15–30+ seconds | Render and/or Neon woke from idle; AI inference adds latency | Use always-on hosting; compare cold and warm timings for `/health`, `/history`, and `/analyze` |
 | `Unsupported AI Provider: ...` | Typo in `AI_PROVIDER`, or picked `claude` before implementing it | Use exactly `gemini`, `openai`, or `claude`; implement `ClaudeProvider` first if choosing Claude |
 | Angular can't reach the API | `apiBaseUrl` in `environment.development.ts` points somewhere wrong, or backend isn't running | Confirm backend is up on 8000 and the environment file matches |
 | Alembic says table already exists / out of sync | Migrations run out of order or DB was created manually | `uv run alembic current` to check state, or drop and recreate the dev DB |

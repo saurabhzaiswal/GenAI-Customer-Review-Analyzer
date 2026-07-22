@@ -1,0 +1,97 @@
+<div class="page-shell">
+  <app-page-header
+    [title]="'reviews.heroTitle' | translate"
+    [subtitle]="'reviews.heroSubtitle' | translate"
+    [showLogo]="true"
+  ></app-page-header>
+
+  <div class="page-grid">
+    <section class="page-panel">
+      <app-review-form
+        [isSubmitting]="reviewService.loading()"
+        (analyze)="onAnalyze($event)"
+        (analyzeAndSave)="onAnalyzeAndSave($event)"
+      ></app-review-form>
+
+      <div class="status-panel" *ngIf="reviewService.error() as error">
+        <mat-icon aria-hidden="true">warning</mat-icon>
+        <p>{{ error }}</p>
+      </div>
+
+      <section class="summary-panel" *ngIf="reviewService.batchSummary().totalReviews > 0">
+        <div class="summary-panel__header">
+          <h2>{{ 'reviews.batchSummary' | translate }}</h2>
+          <button mat-stroked-button type="button" (click)="clearResults()">
+            <mat-icon aria-hidden="true">clear_all</mat-icon>
+            {{ 'reviews.clearResults' | translate }}
+          </button>
+        </div>
+
+        <div class="summary-grid">
+          <app-stats-card
+            [title]="'reviews.summaryReviews' | translate"
+            [value]="reviewService.batchSummary().totalReviews.toString()"
+            [description]="'reviews.analyzedSession' | translate"
+          ></app-stats-card>
+
+          <app-stats-card
+            [title]="'dashboard.averageScore' | translate"
+            [value]="reviewService.batchSummary().averageScore.toString()"
+            [description]="'reviews.meanScore' | translate"
+          ></app-stats-card>
+
+          <app-stats-card
+            [title]="'reviews.positivePercent' | translate"
+            [value]="reviewService.batchSummary().positivePercent + '%'"
+            [description]="'reviews.positiveShare' | translate"
+          ></app-stats-card>
+
+          <app-stats-card
+            [title]="'reviews.topTheme' | translate"
+            [value]="reviewService.batchSummary().topTheme"
+            [description]="'reviews.mostMentionedTopic' | translate"
+            [highlight]="true"
+          ></app-stats-card>
+        </div>
+      </section>
+
+      <section class="analysis-panel">
+        <div class="analysis-panel__header">
+          <h2>{{ 'reviews.recentInsights' | translate }}</h2>
+          <span *ngIf="reviewService.analysisResults().length > 0">
+            {{ reviewService.analysisResults().length }} {{ (reviewService.analysisResults().length === 1 ? 'reviews.result' : 'reviews.results') | translate }}
+          </span>
+        </div>
+
+        <div class="result-list" *ngIf="reviewService.analysisResults().length > 0; else noAnalysis">
+          <app-review-card
+            *ngFor="let result of reviewService.analysisResults()"
+            [result]="result"
+          ></app-review-card>
+        </div>
+
+        <ng-template #noAnalysis>
+          <app-empty-state
+            [title]="'reviews.noAnalysisTitle' | translate"
+            [description]="'reviews.noAnalysisDescription' | translate"
+          ></app-empty-state>
+        </ng-template>
+      </section>
+    </section>
+  </div>
+
+  <section class="saved-history-section">
+    <div class="saved-history-section__header">
+      <div>
+        <p class="eyebrow">{{ 'history.savedFeedback' | translate }}</p>
+        <h2>{{ 'history.reviewHistory' | translate }}</h2>
+        <p>{{ 'history.ongoingHelp' | translate }}</p>
+      </div>
+      <span class="saved-history-section__count">{{ reviewService.savedFeedback().length }} {{ 'history.saved' | translate }}</span>
+    </div>
+    <app-review-history
+      [savedReviews]="reviewService.savedFeedback()"
+      (deleteFeedback)="onDeleteFeedback($event)"
+    ></app-review-history>
+  </section>
+</div>

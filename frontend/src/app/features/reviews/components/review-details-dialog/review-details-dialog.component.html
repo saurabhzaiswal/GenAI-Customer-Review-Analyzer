@@ -1,0 +1,18 @@
+<header class="details-header">
+  <div><p>{{ 'history.savedFeedback' | translate }}</p><h2 mat-dialog-title>{{ 'history.view' | translate }}</h2></div>
+  <button mat-icon-button type="button" [attr.aria-label]="'common.close' | translate" (click)="close()"><mat-icon>close</mat-icon></button>
+</header>
+<mat-dialog-content>
+  <section class="review-copy" aria-labelledby="review-text-heading">
+    <h3 id="review-text-heading">{{ 'reviews.customerReview' | translate }}</h3><p>{{ review.review }}</p>
+  </section>
+  <dl class="details-grid">
+    <div><dt>{{ 'history.sentiment' | translate }}</dt><dd><app-sentiment-badge [label]="review.label" [score]="review.score"></app-sentiment-badge></dd></div>
+    <div><dt>{{ 'history.score' | translate }}</dt><dd>{{ review.score }}/5</dd></div>
+    <div><dt>{{ 'history.theme' | translate }}</dt><dd>{{ review.theme }}</dd></div>
+    <div><dt>{{ 'history.confidence' | translate }}</dt><dd>{{ (review.confidence ?? 0) | percent:'1.0-0' }}</dd></div>
+    <div class="details-grid__wide"><dt>{{ 'reviews.suggestion' | translate }}</dt><dd>{{ review.suggestion || ('reviews.noSuggestion' | translate) }}</dd></div>
+    <div class="details-grid__wide"><dt>{{ 'history.saved' | translate }}</dt><dd>{{ review.created_at | dayjsFormat }}</dd></div>
+  </dl>
+</mat-dialog-content>
+<mat-dialog-actions align="end"><button mat-flat-button type="button" (click)="close()">{{ 'common.close' | translate }}</button></mat-dialog-actions>

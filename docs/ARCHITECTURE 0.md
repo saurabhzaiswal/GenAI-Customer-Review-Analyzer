@@ -1,5 +1,7 @@
 # Architecture
 
+> This is an earlier design draft. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the current implementation.
+
 This document describes the system as it is actually implemented in this repository - not an aspirational version. Where something is planned but not built yet, it's explicitly marked **(planned)**.
 
 ## 1. High-level view

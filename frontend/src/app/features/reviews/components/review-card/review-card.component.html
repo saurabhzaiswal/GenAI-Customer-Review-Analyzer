@@ -1,0 +1,32 @@
+<mat-card *ngIf="result" class="review-card" [class.review-card--error]="result.hasError">
+  <div class="review-card__header">
+    <div class="review-card__heading">
+      <h3>{{ 'reviews.aiAnalysis' | translate }}</h3>
+      <p class="review-card__theme">{{ result.theme }}</p>
+    </div>
+    <app-sentiment-badge [label]="result.label" [score]="result.score"></app-sentiment-badge>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <blockquote class="review-card__quote">
+    &ldquo;{{ result.review }}&rdquo;
+  </blockquote>
+
+  <div class="review-card__content">
+    <div class="review-card__field">
+      <span>{{ 'history.score' | translate }}</span>
+      <strong>{{ result.score }} / 5</strong>
+    </div>
+
+    <div class="review-card__field">
+      <span>{{ 'history.confidence' | translate }}</span>
+      <strong>{{ (result.confidence ?? 0) | percent:'1.0-0' }}</strong>
+    </div>
+
+    <div class="review-card__field review-card__field--wide">
+      <span>{{ 'reviews.suggestion' | translate }}</span>
+      <p>{{ result.suggestion || ('reviews.noSuggestion' | translate) }}</p>
+    </div>
+  </div>
+</mat-card>

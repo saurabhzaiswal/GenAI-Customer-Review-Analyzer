@@ -1,5 +1,7 @@
 # Architecture - GenAI Customer Review Analyzer
 
+> For the current router hierarchy, dependency lifetimes, and production latency guidance, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). This longer document is retained for historical detail.
+
 This document breaks the backend down step by step, with a Mermaid diagram and a short theory note for each stage, then zooms out to the full system design. Every diagram reflects what's actually implemented in `backend/app/`, not an aspirational design.
 
 ---
@@ -25,7 +27,7 @@ flowchart TB
     subgraph AI["LLM Providers"]
         I[Gemini API]
         J[OpenAI API]
-        K["Claude / Anthropic API<br/>(stub)"]
+        K["Claude / Anthropic Messages API"]
     end
 
     subgraph DB["Persistence"]

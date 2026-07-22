@@ -1,0 +1,5 @@
+<mat-chip-set [attr.aria-label]="'history.sentiment' | translate">
+  <mat-chip [class]="chipClass">
+    {{ ('history.' + label) | translate }} · {{ score }}/5
+  </mat-chip>
+</mat-chip-set>

@@ -1,0 +1,18 @@
+.page-header {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  overflow: hidden;
+  color: #f8fafc;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: var(--radius);
+  background: var(--brand-gradient);
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.2);
+}
+
+.page-header__content { display: flex; align-items: flex-start; gap: 1rem; }
+.page-header__logo { flex-shrink: 0; width: clamp(250px, 8vw, 350px); height: auto; }
+.eyebrow { display: inline-flex; align-items: center; gap: 0.4rem; margin: 0; color: #7dd3fc; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.eyebrow mat-icon { width: 1rem; height: 1rem; font-size: 1rem; }
+.page-header h1 { margin: 0.55rem 0 0; font-size: clamp(2rem, 4.2vw, 3.35rem); line-height: 1.02; letter-spacing: -0.055em; }
+.subtitle { max-width: 60rem; margin: 1rem 0 0; color: #cbd5e1; font-size: clamp(0.95rem, 1.5vw, 1.05rem); line-height: 1.65; }
+
+@media (max-width: 639px) { .page-header__content { flex-direction: column; }.page-header { padding: 1.5rem; } }

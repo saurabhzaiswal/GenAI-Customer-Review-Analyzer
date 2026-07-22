@@ -8,10 +8,11 @@ from app.schemas.feedback import FeedbackCreate
 
 
 class FeedbackRepository:
-    #   def __init__(self):
+    def __init__(self, db: Session):
+        self.db = db
+
     def create(
         self,
-        db: Session,
         feedback: FeedbackCreate,
     ) -> Feedback:
 
@@ -24,32 +25,28 @@ class FeedbackRepository:
             confidence=feedback.confidence,
         )
 
-        db.add(db_feedback)
-
-        db.commit()
-
-        db.refresh(db_feedback)
+        self.db.add(db_feedback)
+        self.db.commit()
+        self.db.refresh(db_feedback)
 
         return db_feedback
 
     # Get all feedbacks from the table, ordered by creation date (most recent first)
     def get_all(
         self,
-        db: Session,
     ) -> list[Feedback]:
 
         statement = select(Feedback).order_by(Feedback.created_at.desc())
 
-        return list(db.scalars(statement).all())
+        return list(self.db.scalars(statement).all())
 
     # Get feedbacks by id
     def get_by_id(
         self,
-        db: Session,
         feedback_id: UUID | str,
     ) -> Feedback | None:
 
-        return db.get(
+        return self.db.get(
             Feedback,
             feedback_id,
         )
@@ -57,18 +54,14 @@ class FeedbackRepository:
     # Delete feedback by id
     def delete(
         self,
-        db: Session,
         feedback: Feedback,
     ) -> None:
 
-        db.delete(feedback)
-
-        db.commit()
+        self.db.delete(feedback)
+        self.db.commit()
 
     # Count the number of feedbacks in the table
     def count(
         self,
-        db: Session,
     ) -> int:
-
-        return len(self.get_all(db))
+        return len(self.get_all())

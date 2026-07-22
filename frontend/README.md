@@ -1,59 +1,49 @@
 # Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.19.
+Angular 21 frontend for the GenAI Customer Review Analyzer. It provides customer-review analysis, saved-history management, and client-side analytics.
 
-## Development server
+## Main features
 
-To start a local development server, run:
+- Standalone Angular components and signal-based feature state
+- Shared customer-intelligence visual system across Reviews and Dashboard
+- Review history with combined search, sentiment, theme, and minimum-score filtering
+- Sortable Material table with 5/10/20-row pagination
+- Three-dot row actions, review-details dialog, and delete confirmation
+- Global loading and error interceptors
+- Fixed top loading bar with safe concurrent-request tracking
+- Component-per-folder structure for shared UI, feature UI, and feature pages
+- Centralized `--primary-color`/`--secondary-color` theme with `color-mix()` derivatives
+- SEO, social metadata, and WebApplication JSON-LD in `src/index.html`
+- Runtime ngx-translate dictionaries for eight languages and persistent dark mode
+- CSV/Excel review import and filtered Excel/PDF report export via lazy dependencies
+- Dashboard-style PDF reports with product branding, summary metrics, sentiment bars, ranked themes, paginated review cards, and long-review continuation handling
+- Maximum 12px radius for buttons, fields, cards, containers, and Material overlays
+- Flat mobile navigation drawer with inline languages, theme control, backdrop dismissal, and no nested popovers
+- Theme-aware native Chart.js tooltips with review counts, sentiment percentages, and mobile-friendly interaction
+- Complete UI translation coverage for English, Hindi, Japanese, Dutch, Korean, French, German, and Spanish, including dynamic chart text, dialogs, notices, empty states, and localized dates
+- Semantic light/dark surface, text, border, focus, and overlay tokens used consistently by feature components and Material controls
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Development
 
 ```bash
-ng build
+npm install
+npm run start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The development app runs at `http://localhost:4200` and reads its API URL from `src/environments/environment.development.ts`.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Production build
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+Build output is written to `dist/frontend`. The current build reports the configured initial/component-style budget warnings, but the former `dayjs` CommonJS warning has been removed.
 
-For end-to-end (e2e) testing, run:
+## Tests
 
 ```bash
-ng e2e
+npm test
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+When changing `ReviewHistoryComponent`, verify search and each filter both independently and together, change page sizes, navigate pages, sort every column, open View details, cancel deletion, and confirm deletion.

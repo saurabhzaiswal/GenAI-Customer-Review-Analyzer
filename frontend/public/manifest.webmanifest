@@ -1,0 +1,17 @@
+{
+  "name": "GenAI Customer Review Analyzer",
+  "short_name": "Review AI",
+  "description": "Turn customer feedback into clear sentiment and theme insights.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "img/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

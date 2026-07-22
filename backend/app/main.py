@@ -2,8 +2,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 
-from app.api.health_routes import router as health_router
-from app.api.v1.review_routes import router as review_router
+from app.api.router import api_router
 from app.core.config import settings
 
 from app.core.lifespan import lifespan
@@ -49,5 +48,4 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(HTTPException, http_exception_handler)
 
 # Routes
-app.include_router(health_router)
-app.include_router(review_router, prefix="/api/v1")
+app.include_router(api_router)

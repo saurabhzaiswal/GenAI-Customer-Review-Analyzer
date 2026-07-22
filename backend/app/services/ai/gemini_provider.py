@@ -4,6 +4,7 @@ from google.genai import types
 from app.core.config import settings
 from app.schemas.feedback import AnalysisResponse
 from app.services.ai.provider import AIProvider
+from app.exceptions.custom_exceptions import AIProviderException
 
 
 class GeminiProvider(AIProvider):
@@ -61,17 +62,24 @@ class GeminiProvider(AIProvider):
             {review}
             """
 
-        response = self.client.models.generate_content(
-            model=settings.AI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=0.2,
-                response_mime_type="application/json",
-                response_schema=AnalysisResponse,
-            ),
-        )
+        try:
+            response = self.client.models.generate_content(
+                model=settings.AI_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=0.2,
+                    response_mime_type="application/json",
+                    response_schema=AnalysisResponse,
+                ),
+            )
+        except Exception as exc:
+            raise AIProviderException(
+                "The AI analysis service is temporarily unavailable. Please try again."
+            ) from exc
 
         if response.parsed is None:
-            raise RuntimeError("Gemini returned invalid JSON.")
+            raise AIProviderException(
+                "The AI analysis service returned an invalid response. Please try again."
+            )
 
         return response.parsed

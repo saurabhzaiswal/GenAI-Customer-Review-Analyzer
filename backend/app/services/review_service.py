@@ -1,7 +1,5 @@
 from uuid import UUID
 
-from sqlalchemy.orm import Session
-
 from app.repositories.feedback_repository import FeedbackRepository
 from app.schemas.feedback import (
     AnalysisResponse,
@@ -21,7 +19,7 @@ class ReviewService:
     def __init__(
         self,
         ai_provider: AIProvider,
-        repository: FeedbackRepository,
+        repository: FeedbackRepository | None = None,
     ):
         self.ai = ai_provider
         self.repository = repository
@@ -40,7 +38,6 @@ class ReviewService:
 
     def analyze_and_save(
         self,
-        db: Session,
         review: str,
     ):
         """
@@ -60,55 +57,46 @@ class ReviewService:
             confidence=analysis.confidence,
         )
 
-        return self.repository.create(
-            db=db,
-            feedback=feedback,
-        )
+        return self._repository().create(feedback=feedback)
 
     def get_history(
         self,
-        db: Session,
     ):
         """
         Return all saved reviews.
         """
 
-        return self.repository.get_all(db)
+        return self._repository().get_all()
 
     def get_feedback_by_id(
         self,
-        db: Session,
         feedback_id: UUID,
     ):
         """
         Return one review.
         """
 
-        return self.repository.get_by_id(
-            db=db,
-            feedback_id=feedback_id,
-        )
+        return self._repository().get_by_id(feedback_id=feedback_id)
 
     def delete_feedback(
         self,
-        db: Session,
         feedback_id: UUID,
     ):
         """
         Delete one review.
         """
 
-        feedback = self.repository.get_by_id(
-            db=db,
-            feedback_id=feedback_id,
-        )
+        repository = self._repository()
+        feedback = repository.get_by_id(feedback_id=feedback_id)
 
         if feedback is None:
             return None
 
-        self.repository.delete(
-            db=db,
-            feedback=feedback,
-        )
+        repository.delete(feedback=feedback)
 
         return feedback
+
+    def _repository(self) -> FeedbackRepository:
+        if self.repository is None:
+            raise RuntimeError("This operation requires a database repository.")
+        return self.repository

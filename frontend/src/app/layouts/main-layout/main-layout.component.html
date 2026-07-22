@@ -1,4 +1,10 @@
 <div class="layout-shell">
+  <mat-progress-bar
+    *ngIf="loadingService.loading()"
+    class="global-loading-bar"
+    mode="indeterminate"
+    [attr.aria-label]="'common.loading' | translate"
+  ></mat-progress-bar>
   <app-navbar></app-navbar>
 
   <main class="layout-content">

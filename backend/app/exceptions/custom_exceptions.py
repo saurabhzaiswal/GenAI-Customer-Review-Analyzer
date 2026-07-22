@@ -19,7 +19,7 @@ class AIProviderException(AppException):
     def __init__(self, message: str):
         super().__init__(
             message=message,
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 
 

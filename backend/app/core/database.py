@@ -13,6 +13,8 @@ class Base(DeclarativeBase):
 engine = create_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
+    pool_pre_ping=True,
+    pool_recycle=300,
 )
 
 
@@ -29,7 +31,12 @@ def get_db() -> Generator[Session, None, None]:
     try:
         yield db
     except Exception:
-        db.rollback()
+        # A rollback can itself fail when Neon has dropped a stale connection.
+        # Never let that secondary failure hide the original application error.
+        try:
+            db.rollback()
+        except Exception:
+            pass
         raise
     finally:
         db.close()

@@ -1,5 +1,7 @@
 # API Documentation
 
+> Implementation note: endpoints are composed through `app/api/router.py`. Persistence endpoints receive a request-scoped SQLAlchemy session indirectly through the service/repository chain; `POST /reviews/analyze` does not open a database session. Public paths are unchanged.
+
 Base URL (local dev): `http://localhost:8000`
 
 > **Live docs:** FastAPI auto-generates interactive Swagger UI at `http://localhost:8000/docs` and a ReDoc view at `http://localhost:8000/redoc` whenever the server is running - those always reflect the exact current schema. This document is a hand-written companion for reading the API without spinning up the server.

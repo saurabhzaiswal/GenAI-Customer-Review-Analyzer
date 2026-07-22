@@ -1,13 +1,18 @@
 <footer class="footer">
   <div class="footer__inner">
-    <p class="footer__tagline">
-      Structured AI review analysis with Angular, FastAPI, and  Gemini, OpenAI, Claude Code.
-    </p>
-    <div class="footer__links">
-      <a href="https://github.com/saurabhzaiswal" target="_blank" rel="noopener noreferrer">
-        github.com/saurabhzaiswal
-      </a>
+    <div class="footer__brand">
+      <img src="/img/logo.svg" alt="" width="38" height="38" />
+      <div><strong>GenAI Review Analyzer</strong><p>{{ 'footer.tagline' | translate }}</p></div>
     </div>
-    <p class="footer__credit">Built by Saurabh</p>
+    <nav class="footer__nav" aria-label="Footer navigation">
+      <a routerLink="/">{{ 'nav.reviews' | translate }}</a><a routerLink="/dashboard">{{ 'nav.dashboard' | translate }}</a>
+      <a href="https://github.com/saurabhzaiswal" target="_blank" rel="noopener noreferrer"><mat-icon>code</mat-icon>GitHub</a>
+      <a href="https://www.linkedin.com/in/saurabh-choudhary-7ab207239/" target="_blank" rel="noopener noreferrer"><mat-icon>business</mat-icon>LinkedIn</a>
+      <a href="https://dev.to/saurabhzaiswal" target="_blank" rel="noopener noreferrer"><mat-icon>article</mat-icon>DEV Community</a>
+    </nav>
+    <div class="footer__meta">
+      <span>Angular · Python · FastAPI · PostgreSQL · Gemini · OpenAI </span>
+      <span>Built by Saurabh · © {{ currentYear }}</span>
+    </div>
   </div>
 </footer>
