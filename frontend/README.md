@@ -13,8 +13,10 @@ Angular 21 frontend for the GenAI Customer Review Analyzer. It provides customer
 - Fixed top loading bar limited to backend API calls, with per-request tokens that cannot be stranded by duplicate or out-of-order completion
 - Component-per-folder structure for shared UI, feature UI, and feature pages
 - Centralized `--primary-color`/`--secondary-color` theme with `color-mix()` derivatives
-- SEO, social metadata, and WebApplication JSON-LD in `src/index.html`
-- Runtime ngx-translate dictionaries for eight languages and persistent dark mode
+- Build-time prerendered Reviews and Dashboard HTML with route-specific SEO/social metadata, followed by Angular client hydration
+- Runtime ngx-translate dictionaries for eight languages, a globe-triggered
+  selector with compact ISO codes (`EN`, `HI`, `JA`, `NL`, `KO`, `FR`, `DE`,
+  `ES`), and persistent dark mode
 - CSV/Excel review import and filtered Excel/PDF report export via lazy dependencies
 - Dashboard-style jsPDF reports with product branding, summary metrics, sentiment bars, ranked themes, paginated review cards, long-review continuation handling, selected-language labels, and locale-specific embedded Noto fonts
 - Source-root TypeScript aliases (`@app/*` and `@env/*`) replace fragile parent-traversal imports
@@ -25,7 +27,8 @@ Angular 21 frontend for the GenAI Customer Review Analyzer. It provides customer
 - Flat mobile navigation drawer with inline languages, theme control, backdrop dismissal, and no nested popovers
 - Theme-aware native Chart.js tooltips with review counts, sentiment percentages, and mobile-friendly interaction
 - Complete UI translation coverage for English, Hindi, Japanese, Dutch, Korean, French, German, and Spanish, including dynamic chart text, dialogs, notices, empty states, and localized dates
-- Semantic light/dark surface, text, border, focus, and overlay tokens used consistently by feature components and Material controls
+- Semantic light/dark surface, state, table, text, border, focus, and overlay
+  tokens used consistently by feature components and Material controls
 
 ## Development
 
@@ -35,6 +38,9 @@ npm run start
 ```
 
 The development app runs at `http://localhost:4200` and reads its API URL from `src/environments/environment.development.ts`.
+
+From the repository root, `docker compose up --build` can run this development
+server together with FastAPI, PostgreSQL, and Redis. Compose is optional.
 
 ## Production build
 

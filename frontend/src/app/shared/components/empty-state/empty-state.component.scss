@@ -6,8 +6,9 @@
   text-align: center;
   padding: 2rem;
   border-radius: var(--radius);
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
+  background: var(--surface-muted);
+  color: var(--text-color);
+  border: 1px dashed var(--border-strong);
 }
 
 .empty-state__icon {

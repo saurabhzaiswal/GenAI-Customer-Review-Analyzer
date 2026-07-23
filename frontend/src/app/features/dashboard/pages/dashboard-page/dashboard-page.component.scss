@@ -10,19 +10,19 @@
 .dashboard-hero__summary span { color: #bae6fd; font-size: 0.75rem; font-weight: 700; }
 .dashboard-hero__summary strong { font-size: clamp(1.3rem, 2.5vw, 2rem); letter-spacing: -0.04em; }
 .dashboard-hero__summary small { margin-left: 0.12rem; color: #7dd3fc; font-size: 0.65em; }
-.dashboard-section, .dashboard-history { padding: clamp(1.1rem, 2.5vw, 1.6rem); border: 1px solid var(--border); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 96%, transparent); box-shadow: 0 14px 34px var(--shadow-color); }
+.dashboard-section, .dashboard-history { padding: clamp(1.1rem, 2.5vw, 1.6rem); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-elevated); color: var(--text-color); box-shadow: 0 14px 34px var(--shadow-color); }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
-.eyebrow { margin: 0; color: #2563eb; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
+.eyebrow { margin: 0; color: var(--primary-color); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
 .section-heading h2 { margin: 0.3rem 0 0; color: var(--text-color); font-size: clamp(1.25rem, 2vw, 1.55rem); line-height: 1.15; letter-spacing: -0.025em; }
 .section-heading > p { max-width: 28rem; margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.55; text-align: right; }
 .pulse-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .pulse-card { display: grid; align-content: start; gap: 0.4rem; min-height: 155px; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.pulse-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08); }
-.pulse-card--theme { background: linear-gradient(145deg, #eff6ff, #ffffff); border-color: #bfdbfe; }
-.pulse-card__icon { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; margin-bottom: 0.35rem; border-radius: 10px; background: #dbeafe; color: #1d4ed8; }
-.pulse-card__icon--green { background: #dcfce7; color: #16a34a; }.pulse-card__icon--amber { background: #fef3c7; color: #d97706; }.pulse-card__icon--rose { background: #ffe4e6; color: #e11d48; }
+.pulse-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px var(--shadow-color); }
+.pulse-card--theme { background: var(--surface-blue); border-color: var(--border-strong); }
+.pulse-card__icon { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; margin-bottom: 0.35rem; border-radius: 10px; background: var(--surface-blue); color: var(--primary-color); }
+.pulse-card__icon--green { background: var(--surface-green); color: var(--success-color); }.pulse-card__icon--amber { background: var(--surface-amber); color: var(--warning-color); }.pulse-card__icon--rose { background: var(--surface-rose); color: var(--danger-color); }
 .pulse-card p { margin: 0; color: var(--text-muted); font-size: 0.8rem; font-weight: 700; }.pulse-card h3 { overflow: hidden; margin: 0; color: var(--text-color); font-size: clamp(1.25rem, 2.5vw, 1.7rem); line-height: 1.15; letter-spacing: -0.035em; text-overflow: ellipsis; white-space: nowrap; }.pulse-card__hint { color: var(--text-muted); font-size: 0.78rem; }
-.dashboard-section--analytics { padding-bottom: 1.35rem; }.dashboard-section--themes { background: linear-gradient(150deg, #ffffff, #f8fbff); }
+.dashboard-section--analytics { padding-bottom: 1.35rem; }.dashboard-section--themes { background: linear-gradient(150deg, var(--surface), var(--surface-blue)); }
 .theme-list { display: grid; gap: 0.65rem; }.theme-list__item { display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; align-items: center; gap: 0.75rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border); }.theme-list__item:last-child { border-bottom: 0; padding-bottom: 0; }.theme-list__rank { color: var(--primary-color); font-size: 0.8rem; font-weight: 800; }.theme-list__item strong { overflow: hidden; color: var(--text-color); text-overflow: ellipsis; white-space: nowrap; }.theme-list__count { color: var(--text-muted); font-size: 0.85rem; }
 .dashboard-history { padding-bottom: 1.25rem; }.section-heading--history { margin-bottom: 1.35rem; }
 @media (min-width: 720px) { .pulse-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

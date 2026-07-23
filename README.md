@@ -6,6 +6,10 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.116-green?logo=fastapi)
 ![Python](https://img.shields.io/badge/Python-3.14%2B-blue?logo=python)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-SQLAlchemy%202.0-336791?logo=postgresql)
+![Redis](https://img.shields.io/badge/Redis-Rate%20Limit%20%2B%20AI%20Cache-DC382D?logo=redis)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
+![Prometheus](https://img.shields.io/badge/Prometheus-Metrics-E6522C?logo=prometheus)
+![Grafana](https://img.shields.io/badge/Grafana-Dashboards-F46800?logo=grafana)
 ![Alembic](https://img.shields.io/badge/Migrations-Alembic-6BA81E)
 ![Gemini](https://img.shields.io/badge/Google-Gemini-blue?logo=google)
 ![OpenAI](https://img.shields.io/badge/OpenAI-ChatGPT-white?logo=openai)
@@ -75,6 +79,12 @@ SEO metadata in `index.html` includes a canonical production URL, descriptive ti
 - `bleach`-based input sanitization ahead of both the AI call and the database write
 - Centralized custom exception hierarchy → consistent JSON error responses
 - Request-ID + logging middleware, CORS
+- Optional distributed Redis rate limiting: 5 requests/minute/IP for `/analyze` and 10 requests/minute/IP for `/analyze-and-save`
+- Optional 24-hour Redis cache for successful `/analyze` responses, partitioned by AI provider and model
+- Optional 10-minute cache-aside Redis history cache, invalidated after every successful save or delete
+- Fail-open Redis behavior: local development needs no Redis; production enables Redis features by setting `REDIS_URL`
+- Docker Compose contributor stack for Angular, FastAPI, PostgreSQL, and Redis
+- Local Prometheus/Grafana observability with HTTP, AI, Redis, rate-limit, analysis, database-write, CPU, memory, and container-health metrics
 
 ---
 
@@ -86,13 +96,13 @@ Angular 21 (standalone, signals)
         ▼
 FastAPI application
         │
-RequestIDMiddleware → LoggingMiddleware → CORSMiddleware
+RequestIDMiddleware → LoggingMiddleware → RateLimitMiddleware → CORSMiddleware
         │
         ▼
 API Router (/api/v1/reviews/*)
         │
         ▼
-ReviewService (sanitize → orchestrate)
+CachedReviewService (optional Redis cache) → ReviewService (sanitize → orchestrate)
         │
         ├──────────────┐
         ▼              ▼
@@ -113,10 +123,10 @@ ReviewService (sanitize → orchestrate)
 | Layer | Technology |
 |---|---|
 | **Frontend** | Angular 21, TypeScript 5.9, Angular Material 21 + CDK, Tailwind CSS 4, RxJS 7.8, Chart.js 4.5, ngx-translate 18, ExcelJS, jsPDF, Vitest |
-| **Backend** | FastAPI, Python 3.14+, Pydantic v2, SQLAlchemy 2.0, Alembic, `uuid6`, `bleach`, Uvicorn, python-dotenv |
+| **Backend** | FastAPI, Python 3.14+, Pydantic v2, SQLAlchemy 2.0, Alembic, `redis.asyncio`, `uuid6`, `bleach`, Uvicorn, python-dotenv |
 | **AI** | Google Gemini (`google-genai` SDK), OpenAI (Responses API), structured JSON output, prompt engineering |
 | **Database** | PostgreSQL (via `psycopg` v3 driver) |
-| **Tooling** | Git & GitHub, `uv` package manager, npm |
+| **Tooling** | Git & GitHub, `uv` package manager, npm, Docker Compose |
 
 ---
 
@@ -140,7 +150,7 @@ GenAI-Customer-Review-Analyzer/
 │   │   ├── api/
 │   │   │   ├── health_routes.py
 │   │   │   └── v1/review_routes.py
-│   │   ├── core/            # config.py (Settings), database.py, lifespan.py
+│   │   ├── core/            # configuration, database, optional Redis, lifespan
 │   │   ├── dependencies/    # services.py - DI wiring
 │   │   ├── services/
 │   │   │   ├── review_service.py
@@ -149,7 +159,7 @@ GenAI-Customer-Review-Analyzer/
 │   │   ├── repositories/    # feedback_repository.py
 │   │   ├── models/          # feedback.py (SQLAlchemy)
 │   │   ├── schemas/         # feedback.py (Pydantic)
-│   │   ├── middleware/      # cors.py, logging.py, request_id.py
+│   │   ├── middleware/      # CORS, logging, request ID, rate limiting
 │   │   ├── exceptions/      # custom_exceptions.py, handlers.py
 │   │   └── utils/           # logger.py, responses.py, sanitizer.py
 │   └── alembic/             # migrations
@@ -159,6 +169,11 @@ GenAI-Customer-Review-Analyzer/
 │   ├── API_DOCUMENTATION.md
 │   └── SCREENSHOTS/
 │
+├── monitoring/
+│   ├── prometheus/       # scrape configuration
+│   └── grafana/          # provisioned datasource and dashboard
+│
+├── docker-compose.yml
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
 ├── LICENSE
@@ -199,6 +214,9 @@ AI_PROVIDER=gemini                 # gemini | openai | claude
 AI_API_KEY=your_api_key_here
 AI_MODEL=gemini-2.5-flash
 
+# Optional: empty/unset disables rate limiting and all Redis caches
+REDIS_URL=
+
 # Optional Claude-specific overrides when AI_PROVIDER=claude
 ANTHROPIC_API_KEY=your_anthropic_key
 CLAUDE_MODEL=claude-opus-4-8
@@ -229,6 +247,49 @@ ng serve
 ```
 Runs on `http://localhost:4200`.
 
+Redis is not required for this workflow. With `REDIS_URL` empty or absent,
+the backend skips Redis initialization and both Redis features are disabled.
+
+**Optional all-in-one Docker workflow**
+
+```bash
+# Set AI_API_KEY in your shell or a root .env file first.
+docker compose up --build
+```
+
+This starts Angular on `4200`, FastAPI on `8000`, PostgreSQL on `5432`, and
+Redis on `6379`, plus Prometheus on `9090`, Grafana on `3000`, and cAdvisor on
+`8080`. Grafana credentials are `admin` / `admin` for this local-only stack.
+Compose is for local reproducibility only; production remains Vercel + Render
++ Neon + optional Upstash Redis.
+
+### Local monitoring
+
+The backend exposes Prometheus text metrics at `http://localhost:8000/metrics`.
+Prometheus scrapes the backend and cAdvisor every 15 seconds. Grafana starts
+with its Prometheus datasource and the **GenAI Customer Review Analyzer**
+dashboard already provisioned. Compose enables this endpoint with
+`METRICS_ENABLED=true`; it remains disabled by default on Render.
+
+```text
+Browser -> Angular :4200 -> FastAPI :8000
+                              |  \
+                              |   -> PostgreSQL :5432
+                              -> Redis :6379
+
+Prometheus :9090 -> FastAPI /metrics
+                 -> cAdvisor :8080 -> Docker container metrics
+Grafana :3000 -> Prometheus
+```
+
+Collected metrics include request totals/status/endpoint, average and p95
+latency, in-progress requests, AI request latency/failures, Redis cache
+hits/misses, rate-limit rejections, completed analyses, database write latency,
+and container CPU/memory/last-seen health.
+
+Monitoring screenshot placeholders live in
+[`monitoring/screenshots`](monitoring/screenshots/README.md).
+
 ## Production latency (Vercel + Render + Neon)
 
 The reported browser timings show slow first requests (about 17-32 seconds) followed by a warm history request around 500 ms. That pattern is consistent with cold starts: a sleeping Render service must start its Python process, and suspended Neon compute may also need to wake and establish a database connection. `analyze` also waits on the external AI model, so even a warm AI request is not guaranteed to finish in under one second.
@@ -245,6 +306,8 @@ The SQLAlchemy `Engine` is created once and acts as the shared, thread-safe pool
 - Three-layer input validation before anything reaches the AI or the database: Pydantic length constraints → `bleach` HTML/script stripping → "is there anything meaningful left" check
 - `X-Request-ID` header on every response for tracing a client error back to a specific server log line
 - AI provider errors (e.g. Gemini `503` overload responses seen during development) are caught rather than leaking a raw stack trace to the client
+- Rate-limit rejections return `429` before Gemini/OpenAI/Claude is called
+- Redis failures are logged and fail open instead of taking down the API
 
 ---
 
@@ -275,6 +338,8 @@ This project demonstrates hands-on experience with:
 - SQLAlchemy 2.0 + Alembic migrations against PostgreSQL, UUIDv7 primary keys
 - Prompt engineering for structured, injection-resistant LLM output
 - Centralized exception handling, middleware, and request tracing
+- Distributed Redis rate limiting and provider/model-aware AI response caching
+- Reproducible local multi-service development with Docker Compose
 - Reading, auditing, and correcting a real codebase (not just writing one)
 
 ---
@@ -282,8 +347,17 @@ This project demonstrates hands-on experience with:
 ##  Future Enhancements
 
 - JWT authentication, user accounts, role-based access control
-- Docker & Docker Compose (Angular + FastAPI + PostgreSQL + Redis)
 - Real-time streaming responses via WebSockets
+- **Semantic Redis caching for differently worded but equivalent reviews.** The
+  current SHA-256 cache intentionally matches normalized text exactly:
+  `"Great pizza!"` and `"The pizza was amazing."` produce different hashes and
+  therefore make separate AI calls. Redis does not understand language
+  meaning—it only stores values under exact keys. A future semantic cache could
+  generate review embeddings, search for nearby vectors, and reuse an analysis
+  when similarity passes a carefully tested threshold. Possible storage/search
+  options include Redis Vector Search, `pgvector`, Pinecone, Weaviate, or
+  ChromaDB. Exact caching remains the safer default because it cannot
+  accidentally reuse an analysis for text with materially different meaning.
 - Cloud deployment (AWS / Azure / GCP)
 
 ---

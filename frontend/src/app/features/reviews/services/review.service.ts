@@ -1,4 +1,5 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { ReviewApiService } from '@app/core/services/review-api.service';
 import { AnalysisResponse, ReviewBatchSummary } from '@app/features/reviews/models/analysis-response';
@@ -8,6 +9,7 @@ import { ReviewRequest } from '@app/features/reviews/models/review-request';
 @Injectable({ providedIn: 'root' })
 export class ReviewService {
   private static readonly batchConcurrency = 3;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private historyLoaded = false;
   private historyRequest?: Promise<void>;
   readonly analysisResults = signal<AnalysisResponse[]>([]);
@@ -89,6 +91,7 @@ export class ReviewService {
   }
 
   async loadHistory(force = false): Promise<void> {
+    if (!this.isBrowser) return;
     if (!force && this.historyLoaded) return;
     if (this.historyRequest) return this.historyRequest;
 

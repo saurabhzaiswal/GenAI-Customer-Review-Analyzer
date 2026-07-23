@@ -5,13 +5,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 from app.api.router import api_router
 from app.core.config import settings
-
 from app.core.lifespan import lifespan
-from app.middleware.cors import register_cors
-from app.middleware.request_id import RequestIDMiddleware
-from app.middleware.logging import LoggingMiddleware
-
-
 from app.exceptions.custom_exceptions import AppException
 from app.exceptions.handlers import (
     app_exception_handler,
@@ -19,6 +13,11 @@ from app.exceptions.handlers import (
     http_exception_handler,
     validation_exception_handler,
 )
+from app.middleware.cors import register_cors
+from app.middleware.logging import LoggingMiddleware
+from app.middleware.metrics import MetricsMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
+from app.middleware.request_id import RequestIDMiddleware
 
 
 load_dotenv()
@@ -29,6 +28,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RateLimitMiddleware)
+if settings.METRICS_ENABLED:
+    app.add_middleware(MetricsMiddleware)
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)

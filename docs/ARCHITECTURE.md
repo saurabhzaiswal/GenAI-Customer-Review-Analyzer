@@ -7,7 +7,9 @@ For implementation-level class diagrams, sequence diagrams, state ownership, per
 ## Request flow
 
 ```text
-Angular -> middleware -> master API router -> v1 router -> route -> ReviewService
+Angular -> middleware -> master API router -> v1 router -> route -> CachedReviewService
+                                                                      |
+                                                               ReviewService
                                                                 /            \
                                                         AIProvider    FeedbackRepository
                                                                             |
@@ -24,8 +26,51 @@ Angular -> middleware -> master API router -> v1 router -> route -> ReviewServic
 - `Session`: one per database request because it owns transaction and ORM identity-map state.
 - Database repository/service: request-scoped because they hold that session.
 - AI provider and analysis-only service: process-cached. `/analyze` never waits for Neon.
+- Redis client: optional process-wide async pool, initialized lazily and closed by the lifespan hook.
+- Cached analysis facade: process-cached and database-free; Redis hits bypass the configured AI provider.
 
 FastAPI constructs these dependencies in `app/dependencies/services.py`. Route handlers no longer accept or forward raw sessions.
+
+## Optional Redis boundary
+
+`REDIS_URL` is the feature switch for both Redis capabilities. When absent,
+startup skips Redis and local development behaves exactly as before. When
+present, `app/core/redis.py` creates one `redis.asyncio` client with bounded
+timeouts and graceful shutdown. Connection failures use a short retry backoff
+and fail open.
+
+`RateLimitMiddleware` applies only to the two expensive AI POST routes. An
+atomic Redis script performs `INCR` and the first-request `EXPIRE`, creating a
+60-second fixed window per client IP and endpoint. Limits are centralized in
+one mapping.
+
+`CachedReviewService` decorates only analysis-without-save. It hashes normalized
+sanitized review text and partitions keys by provider and model. Valid,
+successful `AnalysisResponse` values live for 24 hours. Validation failures,
+provider errors, rate-limit responses, and analyze-and-save operations are not
+cached.
+
+`CachedFeedbackService` implements cache-aside history reads. A history miss
+loads PostgreSQL through the existing `ReviewService`/repository chain and
+stores validated `FeedbackResponse` values for 10 minutes. Successful create
+and delete operations remove `review_history:all`; the next read repopulates
+the cache. PostgreSQL remains the source of truth.
+
+## Local observability boundary
+
+`MetricsMiddleware` records low-cardinality route templates rather than raw
+paths, preventing UUID values from becoming unbounded Prometheus labels.
+`InstrumentedAIProvider` decorates the existing provider abstraction, so
+Gemini, OpenAI, and Claude share one latency/error instrumentation path without
+modifying provider implementations. Cache adapters, rate limiting, and the
+repository record only the metrics owned by their respective layers.
+
+The `/metrics` endpoint uses the standard Prometheus text format. Local
+Prometheus scrapes FastAPI and cAdvisor every 15 seconds; Grafana reads only
+Prometheus and receives its datasource/dashboard through file provisioning.
+This observability stack exists in Docker Compose only and does not alter
+Vercel, Render, Neon, or Upstash production deployment. `METRICS_ENABLED`
+defaults to false and Compose explicitly enables it.
 
 ## Production latency
 
@@ -72,6 +117,12 @@ Feature styles must consume semantic `--surface`, `--surface-muted`, `--text-col
 
 Runtime copy lives in the eight JSON dictionaries under `public/i18n`. Templates use `TranslatePipe`; imperative UI such as chart callbacks, dialogs, snackbars, and interceptor errors uses `TranslateService`. Date formatting follows the active language and rerenders when the locale changes. Product names, external service names, and user/API-authored review content intentionally remain untranslated.
 
+The shared language model stores both the ngx-translate locale and its compact
+ISO 639-1 display code. The desktop navbar retains one recognizable globe
+trigger, while its menu and the mobile drawer render `EN`, `HI`, `JA`, `NL`,
+`KO`, `FR`, `DE`, and `ES` from one source of truth. `JA` identifies the
+Japanese language; `JP` is the ISO country code for Japan.
+
 ## Responsive rendering
 
 The history feature uses one filtered `MatTableDataSource` and one paginator for two presentations:
@@ -114,7 +165,12 @@ Imports that cross component or feature boundaries use the `@app/*` source-root 
 
 ## SEO shell
 
-Because Angular is a client-rendered SPA, static discovery metadata lives in `src/index.html`: canonical URL, title, description, keywords, robots, Open Graph, Twitter, PWA tags, and `WebApplication` JSON-LD. `public/robots.txt` points crawlers to `public/sitemap.xml`, which lists the Reviews and Dashboard routes on the production Vercel domain.
+Angular prerenders the Reviews and Dashboard routes during the production
+build, producing route-specific static HTML before client hydration. Crawlers
+therefore receive the correct canonical URL, title, description, Open Graph,
+and Twitter image without executing JavaScript. Shared defaults and JSON-LD
+remain in `src/index.html`; `public/robots.txt` points to the production
+sitemap.
 
 ## Internationalization and theme state
 

@@ -11,6 +11,9 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
 
+    REDIS_URL: str | None = None
+    METRICS_ENABLED: bool = False
+
     AI_PROVIDER: str
     AI_API_KEY: str
     AI_MODEL: str

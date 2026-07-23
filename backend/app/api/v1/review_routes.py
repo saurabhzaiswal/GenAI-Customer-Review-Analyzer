@@ -3,7 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from app.exceptions.custom_exceptions import FeedbackNotFoundException
 from app.dependencies.services import (
-    get_review_service,
+    get_cached_feedback_service,
+    get_cached_review_service,
     get_review_service_with_repository,
 )
 from app.models.feedback import Feedback
@@ -16,6 +17,8 @@ from app.schemas.feedback import (
 from app.utils.responses import success_response
 
 from app.services.review_service import ReviewService
+from app.services.cached_feedback_service import CachedFeedbackService
+from app.services.cached_review_service import CachedReviewService
 
 router = APIRouter(
     prefix="/reviews",
@@ -28,15 +31,15 @@ router = APIRouter(
     response_model=ApiResponse[AnalysisResponse],
     status_code=status.HTTP_200_OK,
 )
-def analyze_review(
+async def analyze_review(
     request: ReviewRequest,
-    review_service: ReviewService = Depends(get_review_service),
+    review_service: CachedReviewService = Depends(get_cached_review_service),
 ):
     """
     Analyze a customer review using AI LLM without saving it.
     """
 
-    analysis = review_service.analyze_review(request.text)
+    analysis = await review_service.analyze_review(request.text)
     analysis_response = analysis.model_dump(mode="json")
 
     return success_response(
@@ -49,11 +52,10 @@ def build_feedback_response(feedback: Feedback) -> dict[str, object]:
     return FeedbackResponse.model_validate(feedback).model_dump(mode="json")
 
 
-def build_feedback_history(history: list[Feedback]) -> list[dict[str, object]]:
-    return [
-        FeedbackResponse.model_validate(item).model_dump(mode="json")
-        for item in history
-    ]
+def build_feedback_history(
+    history: list[FeedbackResponse],
+) -> list[dict[str, object]]:
+    return [item.model_dump(mode="json") for item in history]
 
 
 @router.post(
@@ -61,15 +63,15 @@ def build_feedback_history(history: list[Feedback]) -> list[dict[str, object]]:
     response_model=ApiResponse[FeedbackResponse],
     status_code=status.HTTP_201_CREATED,
 )
-def analyze_and_save(
+async def analyze_and_save(
     request: ReviewRequest,
-    review_service: ReviewService = Depends(get_review_service_with_repository),
+    review_service: CachedFeedbackService = Depends(get_cached_feedback_service),
 ):
     """
     Analyze a customer review and save it to the database.
     """
 
-    feedback = review_service.analyze_and_save(
+    feedback = await review_service.analyze_and_save(
         review=request.text,
     )
     feedback_response = build_feedback_response(feedback)
@@ -85,14 +87,14 @@ def analyze_and_save(
     response_model=ApiResponse[list[FeedbackResponse]],
     status_code=status.HTTP_200_OK,
 )
-def get_history(
-    review_service: ReviewService = Depends(get_review_service_with_repository),
+async def get_history(
+    review_service: CachedFeedbackService = Depends(get_cached_feedback_service),
 ):
     """
     Return all previously analyzed customer reviews.
     """
 
-    history = review_service.get_history()
+    history = await review_service.get_history()
     history_response = build_feedback_history(history)
 
     return success_response(
@@ -134,12 +136,12 @@ def get_feedback(
     response_model=ApiResponse[FeedbackResponse],
     status_code=status.HTTP_200_OK,
 )
-def delete_feedback(
+async def delete_feedback(
     feedback_id: UUID,
-    review_service: ReviewService = Depends(get_review_service_with_repository),
+    review_service: CachedFeedbackService = Depends(get_cached_feedback_service),
 ):
     """Delete a feedback record."""
-    feedback = review_service.delete_feedback(feedback_id=feedback_id)
+    feedback = await review_service.delete_feedback(feedback_id=feedback_id)
     if feedback is None:
         raise FeedbackNotFoundException()
 

@@ -1,8 +1,10 @@
+from time import perf_counter
 from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.metrics import DATABASE_WRITE_DURATION_SECONDS
 from app.models.feedback import Feedback
 from app.schemas.feedback import FeedbackCreate
 
@@ -15,21 +17,29 @@ class FeedbackRepository:
         self,
         feedback: FeedbackCreate,
     ) -> Feedback:
+        started_at = perf_counter()
+        status = "error"
 
-        db_feedback = Feedback(
-            review=feedback.review,
-            label=feedback.label,
-            score=feedback.score,
-            theme=feedback.theme,
-            suggestion=feedback.suggestion,
-            confidence=feedback.confidence,
-        )
+        try:
+            db_feedback = Feedback(
+                review=feedback.review,
+                label=feedback.label,
+                score=feedback.score,
+                theme=feedback.theme,
+                suggestion=feedback.suggestion,
+                confidence=feedback.confidence,
+            )
 
-        self.db.add(db_feedback)
-        self.db.commit()
-        self.db.refresh(db_feedback)
+            self.db.add(db_feedback)
+            self.db.commit()
+            self.db.refresh(db_feedback)
+            status = "success"
 
-        return db_feedback
+            return db_feedback
+        finally:
+            DATABASE_WRITE_DURATION_SECONDS.labels("create", status).observe(
+                perf_counter() - started_at
+            )
 
     # Get all feedbacks from the table, ordered by creation date (most recent first)
     def get_all(
