@@ -6,6 +6,21 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- Replaced repeated translation icons with a shared ISO language-code list
+  (`EN`, `HI`, `JA`, `NL`, `KO`, `FR`, `DE`, `ES`) while retaining the
+  desktop globe trigger and adding clear selected and hover menu states.
+- Removed remaining light-only card, table, dialog, form, and empty-state
+  colors in favor of centralized semantic surface/state/table theme tokens.
+- Added a Prometheus `/metrics` endpoint with low-cardinality HTTP request, status, duration, and in-progress metrics.
+- Added custom AI provider latency/failure, Redis cache hit/miss, rate-limit rejection, completed-analysis, and database-write latency metrics.
+- Added local Prometheus, Grafana, and cAdvisor Compose services with named storage, one internal network, automatic datasource/dashboard provisioning, and a ready-to-use project dashboard.
+- Added optional Upstash-compatible `redis.asyncio` infrastructure with lazy startup, graceful shutdown, bounded connection timeouts, retry backoff, and fail-open behavior.
+- Added distributed IP rate limiting for AI endpoints: 5 requests/minute for `/analyze` and 10 requests/minute for `/analyze-and-save`, backed by an atomic Redis `INCR`/`EXPIRE` script.
+- Added a 24-hour provider/model-aware Redis cache for successful analysis-only AI responses using normalized-review SHA-256 keys.
+- Added a 10-minute cache-aside Redis history cache that is invalidated after successful review creation or deletion.
+- Simplified health endpoints to return their payloads directly instead of using the review API `success_response` envelope.
+- Added mocked backend tests for rate limits, IP isolation, endpoint-specific limits, successful cache reuse, cache TTL, and provider-error exclusion.
+- Added optional local Docker Compose services for Angular, FastAPI, PostgreSQL, and Redis without changing Vercel/Render/Neon production deployment.
 - Added a viewable low-level design with Mermaid class, sequence, data, middleware, export, deployment, and CI diagrams.
 - Optimized dashboard aggregation to one pass, cached table-filter parsing and PDF font conversion, and added stable list tracking.
 - Added GZip responses, LIFO database-pool reuse, a newest-first history index, and structured lifecycle/unhandled-error logging.
@@ -52,6 +67,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Restored `DELETE /api/v1/reviews/{feedback_id}`, which the frontend calls.
 
 ### Fixed
+- Prevented blank, malformed, or non-Redis `REDIS_URL` values from stopping
+  FastAPI startup; optional Redis now validates the scheme and fails open.
 - `app/common/enums.py` was missing `from enum import Enum`, which would raise `NameError` the moment the module was imported. Added the import.
 - `FeedbackResponse.id` was typed as `str` while the ORM column is a native `uuid.UUID` - under Pydantic v2 this can raise a validation error when building the response straight from the SQLAlchemy model. Retyped as `UUID`.
 - `LoggingMiddleware` used `print()` instead of the app's configured `logger` (`app/utils/logger.py`). Switched to `logger.info(...)` and added status code + request ID to the log line.

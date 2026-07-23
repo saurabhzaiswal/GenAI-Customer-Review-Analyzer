@@ -42,6 +42,8 @@
 | **Node.js** | 20+ | Angular 21 CLI + build tooling |
 | **npm** | 10+ | Frontend package manager (repo pins `packageManager: npm@10.9.0`) |
 | **PostgreSQL** | 14+ | Persistence for saved/analyzed reviews |
+| **Redis** | Optional | Distributed rate limiting and AI response caching; not required for normal local development |
+| **Docker** | Optional | Runs the complete contributor stack with Compose |
 | **Git** | any recent | Clone + version control |
 | **An LLM API key** | - | Google Gemini (or OpenAI) key - see [Section 4](#4-the-ai-provider-layer--your-llm-switch) |
 
@@ -100,6 +102,7 @@ Open `.env` and fill in the real values - see the annotated table below.
 | `APP_URL` | `http://localhost:4200` | Angular's origin - used for CORS |
 | `DEBUG` | `true` | Enables SQL echo + verbose errors locally |
 | `DATABASE_URL` | `postgresql+psycopg://postgres:1234@localhost:5432/customer_review_analyzer` | SQLAlchemy engine URL (psycopg v3 driver) |
+| `REDIS_URL` | empty locally; `rediss://...upstash.io:6379` in production | Optional; enables distributed rate limiting and the 24-hour AI cache |
 | `AI_PROVIDER` | `gemini` \| `openai` \| `claude` | **This is your LLM switch** - see Section 4 |
 | `AI_API_KEY` | `your_api_key_here` | API key for whichever provider you chose |
 | `AI_MODEL` | `gemini-2.5-flash` | Model name, passed straight to the provider SDK |
@@ -237,6 +240,57 @@ You should get back JSON like:
 
 If that works, your LLM wiring is correct end to end.
 
+### Optional Redis behavior
+
+No Redis installation is needed for the two-terminal workflow above. Leave
+`REDIS_URL` empty or unset and the backend skips Redis initialization. Rate
+limiting, AI response caching, and history caching are then disabled.
+
+For Render production, set `REDIS_URL` to the TLS connection string shown in
+the Upstash Redis console:
+
+```env
+REDIS_URL=rediss://default:<password>@<database>.upstash.io:6379
+```
+
+Use the Redis connection URL beginning with `rediss://`. Do not use the
+Upstash REST endpoint beginning with `https://`, and do not enter only the
+database hostname. Blank or malformed Redis configuration disables the
+optional Redis features without preventing FastAPI from starting.
+
+If Redis is temporarily unavailable, the backend fails open so analysis
+requests continue instead of taking down the application.
+
+### Optional Docker Compose workflow
+
+Docker users can start all four local services from the repository root:
+
+```bash
+# Export a real provider key first.
+export AI_API_KEY=your_api_key_here
+docker compose up --build
+```
+
+This starts Angular (`4200`), FastAPI (`8000`), PostgreSQL (`5432`), Redis
+(`6379`), Prometheus (`9090`), Grafana (`3000`), and cAdvisor (`8080`).
+Compose automatically applies Alembic migrations before starting FastAPI.
+It is intended for contributor onboarding; production remains Vercel + Render
++ Neon + Upstash.
+
+Grafana uses local-only credentials `admin` / `admin`. Its Prometheus datasource
+and project dashboard are provisioned automatically. Open:
+
+- `http://localhost:9090/targets` to verify backend and cAdvisor scrape targets.
+- `http://localhost:3000` to view the ready dashboard.
+- `http://localhost:8000/metrics` to inspect raw backend metrics.
+
+Prometheus and Grafana store data in named volumes. Every service communicates
+over the Compose `app_network` bridge using service names instead of
+`localhost`.
+
+Compose sets `METRICS_ENABLED=true` for FastAPI. The default is `false`, so
+Render does not expose `/metrics` unless you explicitly opt in and protect it.
+
 ---
 
 ## 8. Environment A - Local VS Code
@@ -346,6 +400,9 @@ Cursor is a VS Code fork, so almost everything in Section 8 applies unchanged:
 | CORS error in the browser console | `APP_URL` in `.env` doesn't match the Angular origin | Set `APP_URL=http://localhost:4200` (or your Codespace/Coder forwarded URL) |
 | `The AI analysis service is temporarily unavailable` | Bad key, quota/rate limit, provider outage, or network failure | Check Render logs, the API key, quota, and model; retry transient failures |
 | First production request takes 15-30+ seconds | Render and/or Neon woke from idle; AI inference adds latency | Use always-on hosting; compare cold and warm timings for `/health`, `/history`, and `/analyze` |
+| Redis connection warning at startup | `REDIS_URL` is wrong or Upstash is unavailable | Check the TLS `rediss://` URL; the API continues in fail-open mode |
+| Grafana dashboard has no data | Prometheus has not completed its first scrape or the backend is unhealthy | Check `http://localhost:9090/targets`, then generate API traffic |
+| cAdvisor fails on Docker Desktop | Required Linux VM mounts are unavailable | Confirm Linux-container mode and Docker Desktop filesystem permissions |
 | `Unsupported AI Provider: ...` | Typo in `AI_PROVIDER` | Use exactly `gemini`, `openai`, or `claude` |
 | Angular can't reach the API | `apiBaseUrl` in `environment.development.ts` points somewhere wrong, or backend isn't running | Confirm backend is up on 8000 and the environment file matches |
 | Alembic says table already exists / out of sync | Migrations run out of order or DB was created manually | `uv run alembic current` to check state, or drop and recreate the dev DB |

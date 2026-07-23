@@ -1,0 +1,7 @@
+# Local agent and tooling state
+.agents/
+.ruff_cache/
+
+# Generated scratch output
+output/
+tmp/

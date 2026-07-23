@@ -14,8 +14,8 @@
         <mat-icon aria-hidden="true">insights</mat-icon>
         {{ 'nav.dashboard' | translate }}
       </a>
-      <button mat-icon-button type="button" [matMenuTriggerFor]="languageMenu" [attr.aria-label]="'nav.language' | translate">
-        <mat-icon>language</mat-icon>
+      <button mat-icon-button type="button" [matMenuTriggerFor]="languageMenu" [attr.aria-label]="('nav.language' | translate) + ': ' + preferences.currentLanguage().label">
+        <mat-icon aria-hidden="true">language</mat-icon>
       </button>
       <button mat-icon-button type="button" (click)="preferences.toggleDarkMode()" [attr.aria-label]="'nav.theme' | translate">
         <mat-icon>{{ preferences.darkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
@@ -32,10 +32,18 @@
       </a>
     </nav>
 
-    <mat-menu #languageMenu="matMenu">
-      <button mat-menu-item *ngFor="let language of preferences.languages; trackBy: trackLanguage" (click)="preferences.setLanguage(language.code)">
-        <mat-icon>{{ preferences.language() === language.code ? 'check' : 'translate' }}</mat-icon>
+    <mat-menu #languageMenu="matMenu" class="language-menu">
+      <button
+        mat-menu-item
+        class="language-menu__option"
+        *ngFor="let language of preferences.languages; trackBy: trackLanguage"
+        [class.language-menu__option--active]="preferences.language() === language.code"
+        [attr.aria-current]="preferences.language() === language.code ? 'true' : null"
+        (click)="preferences.setLanguage(language.code)"
+      >
+        <span class="language-code" aria-hidden="true">{{ language.displayCode }}</span>
         <span>{{ language.nativeLabel }}</span>
+        <mat-icon class="language-check" *ngIf="preferences.language() === language.code">check</mat-icon>
       </button>
     </mat-menu>
 
@@ -60,7 +68,7 @@
     <h2><mat-icon>language</mat-icon>{{ 'nav.language' | translate }}</h2>
     <div class="language-grid">
       <button *ngFor="let language of preferences.languages; trackBy: trackLanguage" type="button" (click)="preferences.setLanguage(language.code)" [class.language-option--active]="preferences.language() === language.code">
-        <mat-icon>{{ preferences.language() === language.code ? 'check' : 'translate' }}</mat-icon>{{ language.nativeLabel }}
+        <span class="language-code" aria-hidden="true">{{ language.displayCode }}</span>{{ language.nativeLabel }}
       </button>
     </div>
   </section>

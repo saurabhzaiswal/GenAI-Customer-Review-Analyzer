@@ -9,19 +9,24 @@ import { routes } from './app.routes';
 import { requestIdInterceptor } from './core/interceptors/request-id.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' })),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }),
+    ),
     provideAnimations(),
     provideHttpClient(
-      withInterceptors([requestIdInterceptor, loadingInterceptor, errorInterceptor])
+      withInterceptors([requestIdInterceptor, loadingInterceptor, errorInterceptor]),
     ),
     provideTranslateService({
       loader: provideTranslateHttpLoader({ prefix: '/i18n/', suffix: '.json', failOnError: true }),
       fallbackLang: 'en',
       lang: 'en',
     }),
+    provideClientHydration(withEventReplay()),
   ],
 };

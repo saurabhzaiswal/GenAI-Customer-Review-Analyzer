@@ -81,6 +81,26 @@
   color: #ffffff !important;
 }
 
+.language-code {
+  display: inline-grid;
+  flex: 0 0 2rem;
+  place-items: center;
+  min-width: 2rem;
+  min-height: 1.65rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--primary-color);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+}
+
+.language-check {
+  margin-left: auto !important;
+  color: var(--primary-color);
+}
+
 .mobile-nav-backdrop,
 .mobile-drawer { display: none; }
 
@@ -179,7 +199,7 @@
   .mobile-drawer__section h2 { gap: 0.55rem; margin: 0; color: var(--text-muted); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
   .language-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.35rem; }
   .language-grid button { min-width: 0; font-size: 0.88rem; }
-  .language-grid mat-icon { flex: 0 0 auto; }
+  .language-grid .language-code { flex: 0 0 2rem; }
   .theme-option { width: 100%; margin-top: auto; border-color: var(--border); }
 }
 

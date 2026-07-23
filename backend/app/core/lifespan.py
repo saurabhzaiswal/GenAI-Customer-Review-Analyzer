@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.core.redis import close_redis, initialize_redis
 from app.utils.logger import logger
 
 
@@ -13,7 +14,10 @@ async def lifespan(app: FastAPI):
     """
 
     logger.info("Starting GenAI Customer Review Analyzer")
+    await initialize_redis()
 
-    yield
-
-    logger.info("Shutting down GenAI Customer Review Analyzer")
+    try:
+        yield
+    finally:
+        await close_redis()
+        logger.info("Shutting down GenAI Customer Review Analyzer")

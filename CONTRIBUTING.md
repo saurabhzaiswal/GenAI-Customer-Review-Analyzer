@@ -16,6 +16,7 @@ docs/       Architecture & API documentation
 - [uv](https://docs.astral.sh/uv/) for Python dependency management
 - Node.js 20+ and npm for the Angular frontend
 - A running PostgreSQL instance (local or Docker)
+- Redis is optional; without `REDIS_URL`, rate limiting and AI caching are disabled
 - A Gemini or OpenAI API key (see `backend/.env.example`)
 
 ## Backend setup
@@ -38,6 +39,28 @@ uv run uvicorn app.main:app --reload
 ```
 
 The API runs at `http://localhost:8000`, with interactive docs at `http://localhost:8000/docs` (FastAPI's built-in Swagger UI).
+
+### Optional Docker Compose setup
+
+Run the frontend, backend, PostgreSQL, and Redis together:
+
+```bash
+# Export AI_API_KEY first (and optionally AI_PROVIDER / AI_MODEL).
+docker compose up --build
+```
+
+Compose is a contributor convenience. It does not replace the
+Vercel/Render/Neon production deployment, and normal local development does
+not require Docker or Redis.
+
+The same command also starts local observability:
+
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000` (`admin` / `admin`)
+- cAdvisor: `http://localhost:8080`
+
+Grafana automatically provisions the Prometheus datasource and project
+dashboard; no manual import is required.
 
 ### Adding a database change
 
@@ -88,7 +111,7 @@ The CI workflow runs Ruff checks/format verification for Python and the Angular 
 - Match the existing formatting style you see in the file you're editing.
 - Keep functions single-purpose - the whole backend is organized around the Single Responsibility Principle (see `docs/ARCHITECTURE.md`), and PRs that blur route/service/AI/repository boundaries will likely get a change request.
 - Keep [`docs/LOW_LEVEL_DESIGN.md`](docs/LOW_LEVEL_DESIGN.md) aligned when changing dependency lifetimes, state ownership, API sequences, persistence, or deployment flow.
-- Pull requests must pass the repository CI workflow: backend dependency audit, Ruff lint/format, compilation/tests, frontend tests/build, and the PostgreSQL migration check. Install the locked development tools with `uv sync --all-groups`.
+- Pull requests must pass the repository CI workflow: backend dependency audit, Ruff lint/format, compilation/tests, frontend tests/build, and the PostgreSQL migration check. Redis tests use fakes, so CI needs no Redis service. Install the locked development tools with `uv sync --all-groups`.
 
 ## Protecting `master`
 

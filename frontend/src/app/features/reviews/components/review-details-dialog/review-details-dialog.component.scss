@@ -1,10 +1,10 @@
 :host { display: block; }
 .details-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.5rem 0; }
-.details-header p { margin: 0; color: #2563eb; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
+.details-header p { margin: 0; color: var(--primary-color); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
 .details-header h2 { margin: 0.25rem 0 0; padding: 0; color: var(--text-color); }
 .review-copy { padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-muted); }
 .review-copy h3 { margin: 0 0 0.45rem; color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; }
-.review-copy p { margin: 0; color: #1e293b; line-height: 1.65; white-space: pre-wrap; }
+.review-copy p { margin: 0; color: var(--text-color); line-height: 1.65; white-space: pre-wrap; }
 .details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem 0 0; }
 .details-grid div { padding: 0.85rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .details-grid dt { color: var(--text-muted); font-size: 0.75rem; font-weight: 700; }

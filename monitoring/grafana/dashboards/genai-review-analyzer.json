@@ -1,0 +1,109 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "API Requests/sec",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "targets": [{"expr": "sum by (endpoint) (rate(http_requests_total[1m]))", "legendFormat": "{{endpoint}}", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Average Request Latency",
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "targets": [{"expr": "sum(rate(http_request_duration_seconds_sum[5m])) / clamp_min(sum(rate(http_request_duration_seconds_count[5m])), 1e-9)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "95th Percentile Latency",
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 0},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "In-progress Requests",
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 0},
+      "targets": [{"expr": "sum(http_requests_in_progress)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "AI Errors",
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 0},
+      "targets": [{"expr": "sum(increase(ai_request_failures_total[1h]))", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "AI Provider Latency",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 4},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "targets": [{"expr": "sum by (provider, model) (rate(ai_request_duration_seconds_sum[5m])) / clamp_min(sum by (provider, model) (rate(ai_request_duration_seconds_count[5m])), 1e-9)", "legendFormat": "{{provider}} / {{model}}", "refId": "A"}]
+    },
+    {
+      "type": "gauge",
+      "title": "Redis AI Cache Hit Ratio",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 4},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}, "overrides": []},
+      "targets": [{"expr": "sum(rate(redis_cache_operations_total{cache=\"ai_response\",result=\"hit\"}[5m])) / clamp_min(sum(rate(redis_cache_operations_total{cache=\"ai_response\",result=~\"hit|miss\"}[5m])), 1e-9)", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Redis Cache Misses",
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 8},
+      "targets": [{"expr": "sum(increase(redis_cache_operations_total{result=\"miss\"}[1h]))", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Rate Limited Requests",
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 12},
+      "targets": [{"expr": "sum(increase(rate_limited_requests_total[1h]))", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Review Analyses",
+      "gridPos": {"h": 8, "w": 8, "x": 4, "y": 12},
+      "targets": [{"expr": "sum by (operation, source) (increase(review_analyses_completed_total[5m]))", "legendFormat": "{{operation}} / {{source}}", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Database Write Time",
+      "gridPos": {"h": 8, "w": 8, "x": 12, "y": 12},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le, operation) (rate(database_write_duration_seconds_bucket[5m])))", "legendFormat": "p95 {{operation}}", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Container CPU",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 20},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}, "overrides": []},
+      "targets": [{"expr": "sum by (name) (rate(container_cpu_usage_seconds_total{name!=\"\"}[5m]))", "legendFormat": "{{name}}", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Container Memory",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 20},
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": []},
+      "targets": [{"expr": "sum by (name) (container_memory_working_set_bytes{name!=\"\"})", "legendFormat": "{{name}}", "refId": "A"}]
+    },
+    {
+      "type": "table",
+      "title": "Docker Container Health",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 20},
+      "targets": [{"expr": "time() - container_last_seen{name!=\"\"}", "legendFormat": "{{name}}", "refId": "A", "instant": true}]
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 41,
+  "tags": ["fastapi", "redis", "ai", "docker"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timezone": "browser",
+  "title": "GenAI Customer Review Analyzer",
+  "uid": "genai-review-analyzer",
+  "version": 1
+}

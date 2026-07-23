@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { Injector, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
@@ -24,11 +24,14 @@ function resolveErrorMessage(error: HttpErrorResponse, translate: TranslateServi
 }
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const snackBar = inject(MatSnackBar);
-  const translate = inject(TranslateService);
+  // Resolve these only after a failed request. Eagerly injecting TranslateService
+  // here creates a cycle while TranslateService itself loads its JSON dictionary.
+  const injector = inject(Injector);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      const snackBar = injector.get(MatSnackBar);
+      const translate = injector.get(TranslateService);
       const message = resolveErrorMessage(error, translate);
       snackBar.open(message, translate.instant('common.close'), { duration: 5000, verticalPosition: 'top', panelClass: ['app-snackbar-error'] });
       return throwError(() => new Error(message));

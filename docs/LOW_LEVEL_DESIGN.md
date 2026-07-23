@@ -7,9 +7,13 @@ This document describes the implemented classes, dependencies, state transitions
 ```mermaid
 flowchart LR
     User[Browser user]
-    Vercel[Vercel<br/>Angular static SPA]
+    Vercel[Vercel<br/>Angular prerendered routes]
     Render[Render<br/>FastAPI process]
     Neon[(Neon PostgreSQL)]
+    Upstash[(Upstash Redis<br/>optional)]
+    Prometheus[Prometheus<br/>local only]
+    Grafana[Grafana<br/>local only]
+    cAdvisor[cAdvisor<br/>container metrics]
     Gemini[Google Gemini]
     OpenAI[OpenAI]
     Claude[Anthropic Claude]
@@ -17,9 +21,13 @@ flowchart LR
     User -->|HTTPS| Vercel
     Vercel -->|JSON over HTTPS| Render
     Render -->|SQL over TLS| Neon
+    Render -->|rate limits + AI cache| Upstash
     Render -->|one configured provider| Gemini
     Render --> OpenAI
     Render --> Claude
+    Render -.->|/metrics in local Compose| Prometheus
+    cAdvisor --> Prometheus
+    Prometheus --> Grafana
 ```
 
 Only one AI provider is constructed per backend process. `AI_PROVIDER` selects the strategy at startup. Database sessions remain request-scoped.
@@ -45,20 +53,25 @@ flowchart TB
     subgraph Backend[FastAPI backend]
         API[api<br/>router and v1 routes]
         Dependencies[dependencies<br/>lifetime wiring]
+        RateLimit[middleware<br/>Redis rate limiting]
+        Cache[services<br/>cached analysis facade]
         Service[ReviewService]
         Provider[services/ai<br/>provider strategies]
         Repository[FeedbackRepository]
         Schema[schemas<br/>Pydantic contracts]
         Model[models<br/>SQLAlchemy mapping]
+        RateLimit --> API
         API --> Dependencies
         API --> Schema
         Dependencies --> Service
+        Dependencies --> Cache
+        Cache --> Service
         Service --> Provider
         Service --> Repository
         Repository --> Model
     end
 
-    Core -->|REST| API
+    Core -->|REST| RateLimit
 ```
 
 Cross-feature frontend imports use `@app/*`; environment imports use `@env/*`. Component-local files may use `./`.
@@ -139,6 +152,12 @@ classDiagram
 | Language/theme | `UiPreferencesService` + local storage | Persistent browser preference | Entire application |
 | Search/filter/sort/page | `ReviewHistoryComponent` | Component instance | Desktop table and mobile cards |
 
+`UiPreferencesService.languages` is the single language registry. Each entry
+contains the runtime locale, accessible label, native label, and compact
+uppercase display code, so desktop and mobile selectors cannot drift apart.
+Theme-specific card, state, and table colors similarly come from shared CSS
+custom properties rather than feature-level light-only literals.
+
 ## 4. Backend class relationships and lifetimes
 
 ```mermaid
@@ -196,6 +215,10 @@ classDiagram
 | SQLAlchemy `Engine` | Process | Thread-safe connection pool |
 | AI provider | Process, `lru_cache` | Reuse SDK client and connection pools |
 | Analysis-only `ReviewService` | Process, `lru_cache` | Stateless and database-free |
+| `redis.asyncio` client | Optional process pool | Shared distributed counters/cache; absent locally |
+| `CachedReviewService` | Process, `lru_cache` | Async cache facade around the database-free service |
+| `ReviewHistoryCache` | Stateless/request composition | Shared Redis key with a 10-minute TTL |
+| `CachedFeedbackService` | Request | Wraps the request-scoped repository service and invalidates history after writes |
 | SQLAlchemy `Session` | Request | Transaction and ORM identity-map isolation |
 | Repository-backed `ReviewService` | Request | Holds the request-scoped repository/session |
 
@@ -239,6 +262,36 @@ sequenceDiagram
 
 The frontend bounds concurrency at three requests. This reduces batch latency without creating an unbounded burst against Render or the selected LLM provider.
 
+### Analysis-only rate-limit and cache sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Limit as RateLimitMiddleware
+    participant Redis
+    participant Cache as CachedReviewService
+    participant Service as ReviewService
+    participant AI as AIProvider
+
+    Client->>Limit: POST /api/v1/reviews/analyze
+    Limit->>Redis: atomic INCR + first-request EXPIRE
+    alt over 5 requests in 60 seconds
+        Limit-->>Client: 429 detail
+    else allowed or Redis unavailable
+        Limit->>Cache: analyze_review(text)
+        Cache->>Redis: GET review_cache:provider:model:sha256
+        alt cache hit
+            Redis-->>Cache: validated AnalysisResponse
+        else cache miss or Redis unavailable
+            Cache->>Service: analyze_review(text) in threadpool
+            Service->>AI: analyze sanitized review
+            AI-->>Cache: successful AnalysisResponse
+            Cache->>Redis: SET EX 86400
+        end
+        Cache-->>Client: response envelope
+    end
+```
+
 ## 6. History, filtering, and deletion
 
 ```mermaid
@@ -269,6 +322,18 @@ sequenceDiagram
 Filters remain client-side so keyword, sentiment, theme, score, sorting, mobile cards, and exports all operate on one consistent set. The parsed filter object is cached per filter string instead of being reparsed once for every row.
 
 Deletion always follows `three-dot menu -> confirmation dialog -> DELETE API -> signal update`. The UI removes the row only after the server confirms deletion.
+
+Backend history uses cache-aside Redis storage when configured:
+
+```mermaid
+flowchart LR
+    Request[GET history] --> Redis{review_history:all?}
+    Redis -->|hit| Cached[Return cached FeedbackResponse list]
+    Redis -->|miss/unavailable| Postgres[Load newest-first from PostgreSQL]
+    Postgres --> Store[SET Redis EX 600]
+    Store --> Response[Return response]
+    Mutation[Successful save or delete] --> Invalidate[DEL review_history:all]
+```
 
 ## 7. PDF and spreadsheet export
 
@@ -323,7 +388,8 @@ flowchart LR
     CORS --> GZip[GZip responses >= 1 KB]
     GZip --> Logging[duration/status logging]
     Logging --> RequestID[X-Request-ID]
-    RequestID --> Router
+    RequestID --> RateLimit[Redis rate limit<br/>AI POST routes only]
+    RateLimit --> Router
     Router --> Result{Result}
     Result -->|success| Envelope[ApiResponse envelope]
     Result -->|AppException| Known[typed status + safe message]
@@ -347,6 +413,9 @@ The frontend error interceptor translates HTTP classes into localized snackbars.
 | File tools | Dynamic ExcelJS/jsPDF imports | Keep export libraries outside initial bundle |
 | PDF fonts | Locale-only fetch + base64 cache | Avoid repeat conversion and unrelated fonts |
 | API payloads | GZip at 1 KB | Reduce larger history response transfer |
+| AI protection | Redis fixed-window limits | Reject abusive traffic before an AI call |
+| AI reuse | 24-hour provider/model cache | Avoid duplicate analysis cost and latency |
+| History reads | 10-minute cache-aside Redis value | Avoid repeated full-history PostgreSQL queries |
 | Database | Pre-ping, recycle, LIFO pool | Prefer warm connections and reject stale ones |
 | History query | `created_at` index | Support newest-first ordering |
 
@@ -371,6 +440,7 @@ Changing only the backend to paginate today would silently break dashboard total
 - Provider keys remain backend environment variables and never reach Angular.
 - CORS restricts browser origins to the configured frontend URL.
 - There is currently no user authentication or tenant isolation; all review endpoints are public.
+- Public AI endpoints are IP-rate-limited only when optional Redis is configured.
 - Destructive UI actions require confirmation, but authorization must be added before multi-user production use.
 
 ## 13. Deployment and CI
@@ -388,6 +458,31 @@ flowchart LR
     Master --> Vercel[Vercel frontend]
     Master --> Render[Render backend]
     Render --> Neon[(Neon)]
+    Render --> Upstash[(Upstash Redis<br/>optional)]
 ```
 
 GitHub branch rules should require the stable `CI required` status before merge. Deployment remains configured in Vercel and Render rather than performed by the repository workflow.
+
+## 14. Local monitoring
+
+```mermaid
+flowchart LR
+    Backend[FastAPI /metrics] --> Prometheus
+    cAdvisor[cAdvisor container metrics] --> Prometheus
+    Prometheus --> Grafana[Provisioned Grafana dashboard]
+    Grafana --> Panels[HTTP, AI, cache, rate limit,<br/>database, CPU, memory, health]
+```
+
+| Metric family | Instrumentation owner |
+|---|---|
+| HTTP totals, status, duration, in progress | `MetricsMiddleware` |
+| AI calls, latency, failures | `InstrumentedAIProvider` |
+| Cache hits, misses, errors | Redis cache adapters |
+| Rate-limit rejections | `RateLimitMiddleware` |
+| Completed analyses | Cached service facades |
+| Database write duration | `FeedbackRepository.create` |
+| CPU, memory, container last seen | cAdvisor |
+
+HTTP endpoint labels use FastAPI route templates such as
+`/api/v1/reviews/{feedback_id}` rather than concrete UUID paths. `/metrics`
+does not instrument its own scrape requests.
