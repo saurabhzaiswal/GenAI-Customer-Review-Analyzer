@@ -7,7 +7,7 @@ from app.schemas.feedback import FeedbackResponse
 from app.utils.logger import logger
 
 HISTORY_CACHE_KEY = "review_history:all"
-HISTORY_CACHE_TTL_SECONDS = 10 * 60
+HISTORY_CACHE_TTL_SECONDS = 24 * 60 * 60
 _history_adapter = TypeAdapter(list[FeedbackResponse])
 
 

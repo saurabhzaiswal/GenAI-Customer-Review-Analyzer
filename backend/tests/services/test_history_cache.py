@@ -78,7 +78,7 @@ def test_history_is_cached_for_ten_minutes(monkeypatch) -> None:
 
     assert first == second
     assert review_service.history_calls == 1
-    assert fake_redis.last_ttl == HISTORY_CACHE_TTL_SECONDS == 600
+    assert fake_redis.last_ttl == HISTORY_CACHE_TTL_SECONDS == 86400
 
 
 def test_successful_save_invalidates_history_cache(monkeypatch) -> None:
